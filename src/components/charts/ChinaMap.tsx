@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import * as echarts from 'echarts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
-import { RefreshCw, Info } from 'lucide-react'
+import { RefreshCw, MapPin } from 'lucide-react'
 import { ProvinceMention } from '@/types/province'
 
 interface ChinaMapProps {
@@ -13,133 +13,171 @@ interface ChinaMapProps {
 
 export function ChinaMap({ data = [] }: ChinaMapProps) {
   const chartRef = useRef<HTMLDivElement>(null)
+  const chartInstanceRef = useRef<echarts.ECharts | null>(null)
   const [refreshing, setRefreshing] = useState(false)
+  const [selectedProvince, setSelectedProvince] = useState<string | null>(null)
+  const [mapStats, setMapStats] = useState({ total: 0, max: 0, provinces: 0 })
 
   const initMap = async () => {
-    console.log('=== 开始初始化地图 ===')
-    
-    if (!chartRef.current) {
-      console.log('❌ chartRef.current 为空')
-      return
-    }
-    console.log('✅ chartRef.current 存在')
+    if (!chartRef.current) return
 
     try {
-      // 1. 初始化 ECharts
-      console.log('1. 初始化 ECharts...')
-      const myChart = echarts.init(chartRef.current)
-      console.log('✅ ECharts 初始化成功')
-
-      // 2. 加载地图文件
-      console.log('2. 加载地图文件...')
-      const response = await fetch('/maps/china.json')
-      console.log('地图文件响应状态:', response.status, response.ok)
-      
-      if (!response.ok) {
-        throw new Error(`地图文件加载失败: ${response.status}`)
+      // 如果已经有实例，先清理
+      if (chartInstanceRef.current) {
+        chartInstanceRef.current.dispose()
+        chartInstanceRef.current = null
       }
 
+      const myChart = echarts.init(chartRef.current)
+      chartInstanceRef.current = myChart
+
+      const response = await fetch('/maps/china.json')
+      if (!response.ok) throw new Error(`地图文件加载失败: ${response.status}`)
+
       const geoJson = await response.json()
-      console.log('✅ 地图文件加载成功')
-      console.log('地图数据结构:', {
-        type: geoJson.type,
-        featuresCount: geoJson.features?.length,
-        firstFeature: geoJson.features?.[0]?.properties
-      })
-
-      // 3. 注册地图
-      console.log('3. 注册地图...')
       echarts.registerMap('china', geoJson)
-      console.log('✅ 地图注册成功')
 
-      // 4. 获取省份数据
-      console.log('4. 获取省份数据...')
       let realData = []
       
-      // 如果有传入的 props 数据，优先使用
       if (data.length > 0) {
         realData = data.map((item: any) => ({
           name: item.province,
           value: item.mentions
         }))
-        console.log('使用传入的 props 数据:', realData)
       } else {
-        // 否则从 API 获取
         const dataResponse = await fetch('/api/provinces')
         const dataResult = await dataResponse.json()
-        
-        console.log('省份数据响应:', dataResult)
         
         if (dataResult.success && dataResult.data) {
           realData = dataResult.data.map((item: any) => ({
             name: item.province,
             value: item.mentions
           }))
-          console.log('处理后的地图数据:', realData)
         }
       }
 
-      // 5. 创建地图 - 使用 DebugMap 的成功配置
-      console.log('5. 创建地图...')
+      // 计算统计信息
+      const total = realData.reduce((sum, item) => sum + item.value, 0)
+      const max = Math.max(...(realData.map(d => d.value) || [0]))
+      setMapStats({ total, max, provinces: realData.length })
+
       const option = {
         title: {
-          text: '省份提及热力图',
+          text: '中国省份热力图',
           left: 'center',
+          top: 10,
           textStyle: {
             fontSize: 18,
             fontWeight: '600',
             color: '#1f2937',
-            fontFamily: 'Inter, system-ui, -apple-system, sans-serif'
+            fontFamily: 'Inter, system-ui, sans-serif'
           }
         },
         tooltip: {
           trigger: 'item',
           formatter: function(params: any) {
             if (params.data && params.data.value !== undefined) {
+              const percentage = total > 0 ? ((params.data.value / total) * 100).toFixed(1) : '0'
               return `<div style="
-                padding: 8px 12px;
-                border-radius: 6px;
-                background: rgba(255, 255, 255, 0.95);
+                padding: 12px 16px;
+                border-radius: 8px;
+                background: rgba(255, 255, 255, 0.98);
                 border: 1px solid #e5e7eb;
-                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+                min-width: 180px;
               ">
-                <div style="font-weight: 600; margin-bottom: 4px;">${params.data.name}</div>
-                <div style="color: #6b7280;">提及次数: <span style="color: #1f2937; font-weight: bold;">${params.data.value}</span></div>
+                <div style="font-weight: 700; font-size: 16px; margin-bottom: 8px; color: #1f2937;">${params.data.name}</div>
+                <div style="margin-bottom: 4px;">
+                  <span style="color: #6b7280;">提及次数: </span>
+                  <span style="color: #3b82f6; font-weight: 600;">${params.data.value.toLocaleString()}</span>
+                </div>
+                <div style="margin-bottom: 4px;">
+                  <span style="color: #6b7280;">占比: </span>
+                  <span style="color: #059669; font-weight: 600;">${percentage}%</span>
+                </div>
+                <div style="font-size: 12px; color: #9ca3af; border-top: 1px solid #f3f4f6; padding-top: 6px; margin-top: 6px;">
+                  点击选中此省份
+                </div>
               </div>`
             }
-            return `${params.name}: 暂无数据`
+            return `<div style="
+              padding: 12px 16px;
+              border-radius: 8px;
+              background: rgba(255, 255, 255, 0.98);
+              border: 1px solid #e5e7eb;
+              box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            ">
+              <div style="font-weight: 600; color: #1f2937; margin-bottom: 4px;">${params.name}</div>
+              <div style="color: #9ca3af; font-size: 13px;">暂无数据</div>
+            </div>`
           }
         },
         visualMap: {
           min: 0,
-          max: Math.max(...(realData.map((d: any) => d.value) || [100])),
-          left: 'left',
-          top: 'bottom',
+          max: Math.max(...(realData.map(d => d.value) || [100])),
+          left: 20,
+          bottom: 60,
           text: ['高', '低'],
           textStyle: {
             color: '#6b7280',
-            fontSize: 12
+            fontSize: 12,
+            fontWeight: '500'
           },
           inRange: {
-            color: ['#f0f9ff', '#3b82f6'] // 浅蓝到深蓝的渐变
-          }
+            color: ['#f0f9ff', '#dbeafe', '#bfdbfe', '#93c5fd', '#60a5fa', '#3b82f6', '#2563eb', '#1d4ed8']
+          },
+          outOfRange: {
+            color: '#f3f4f6'
+          },
+          calculable: true,
+          orient: 'horizontal',
+          itemWidth: 20,
+          itemHeight: 140
         },
         series: [{
           type: 'map',
           map: 'china',
-          roam: true, // 启用拖拽和缩放
+          roam: 'move',
+          scaleLimit: {
+            min: 0.5,
+            max: 3
+          },
+          aspectScale: 0.85,
+          zoom: 1.1,
           itemStyle: {
-            borderColor: '#999', // 使用 DebugMap 的边框颜色
-            borderWidth: 1
+            borderColor: '#e5e7eb',
+            borderWidth: 0.5,
+            shadowColor: 'transparent'
           },
           emphasis: {
             itemStyle: {
-              areaColor: '#fbbf24' // 悬停时金黄色
+              areaColor: '#fbbf24',
+              borderColor: '#f59e0b',
+              borderWidth: 1,
+              shadowBlur: 4,
+              shadowColor: 'rgba(251, 191, 36, 0.2)'
+            },
+            label: {
+              show: true,
+              fontSize: 13,
+              color: '#ffffff',
+              fontWeight: '600',
+              fontFamily: 'Inter, system-ui, sans-serif',
+              textShadowColor: 'rgba(0, 0, 0, 0.7)',
+              textShadowBlur: 2
             }
           },
           select: {
             itemStyle: {
-              areaColor: '#ef4444' // 选中时红色
+              areaColor: '#ef4444',
+              borderColor: '#dc2626',
+              borderWidth: 1
+            },
+            label: {
+              show: true,
+              fontSize: 13,
+              color: '#ffffff',
+              fontWeight: '600'
             }
           },
           data: realData
@@ -147,74 +185,142 @@ export function ChinaMap({ data = [] }: ChinaMapProps) {
       }
 
       myChart.setOption(option)
-      console.log('✅ 地图创建成功')
 
-      // 添加事件监听
+      // 添加交互事件
       myChart.on('click', function(params: any) {
-        console.log('点击了省份:', params.name)
+        if (params.data) {
+          setSelectedProvince(params.name)
+        }
+      })
+
+      // 双击重置视图
+      myChart.on('dblclick', function() {
+        if (chartInstanceRef.current) {
+          chartInstanceRef.current.dispatchAction({
+            type: 'restore'
+          })
+          setSelectedProvince(null)
+        }
       })
 
     } catch (error) {
-      console.log('❌ 地图加载失败:', error)
+      console.error('地图初始化失败:', error)
     }
   }
 
   // 手动刷新
   const handleRefresh = async () => {
     setRefreshing(true)
-    console.log('手动刷新地图...')
     await initMap()
-    setTimeout(() => setRefreshing(false), 300)
+    setTimeout(() => setRefreshing(false), 500)
   }
 
   useEffect(() => {
-    initMap()
+    // 只在组件挂载时初始化一次
+    let mounted = true
+    
+    const initialize = async () => {
+      if (mounted) {
+        await initMap()
+      }
+    }
+    
+    initialize()
+    
+    return () => {
+      mounted = false
+      if (chartInstanceRef.current) {
+        chartInstanceRef.current.dispose()
+        chartInstanceRef.current = null
+      }
+    }
+  }, [])
+
+  // 单独处理 data 变化
+  useEffect(() => {
+    if (chartInstanceRef.current && data.length > 0) {
+      // 只更新数据，不重新初始化整个地图
+      const processedData = data.map((item: any) => ({
+        name: item.province,
+        value: item.mentions
+      }))
+      
+      const total = processedData.reduce((sum, item) => sum + item.value, 0)
+      const max = Math.max(...processedData.map(d => d.value))
+      setMapStats({ total, max, provinces: processedData.length })
+      
+      chartInstanceRef.current.setOption({
+        series: [{
+          data: processedData
+        }],
+        visualMap: {
+          max: max
+        }
+      }, false)
+    }
   }, [data])
 
   return (
     <Card className="relative overflow-hidden">
       <CardHeader className="relative flex flex-row items-center justify-between space-y-0 pb-4">
         <div className="space-y-1">
-          <CardTitle className="text-xl font-semibold tracking-tight flex items-center gap-2">
+          <CardTitle className="text-xl font-semibold tracking-tight flex items-center gap-3">
+            <MapPin className="h-5 w-5 text-blue-600" />
             中国省份热力图
-            <div className="relative group">
-              <Info className="h-4 w-4 text-muted-foreground cursor-help" />
-              <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 px-3 py-2 text-xs text-white bg-gray-900 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
-                拖拽移动地图，滚轮缩放，点击省份选中
+            {selectedProvince && (
+              <div className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">
+                已选中: {selectedProvince}
               </div>
-            </div>
+            )}
           </CardTitle>
           <CardDescription className="text-sm text-muted-foreground">
-            基于YouTube视频内容的省份提及频次分析，颜色越深代表提及次数越多
+            基于YouTube视频内容的省份提及频次分析
+            {mapStats.provinces > 0 && (
+              <span className="ml-2 text-blue-600 font-medium">
+                • 共{mapStats.provinces}个省份 • 总计{mapStats.total.toLocaleString()}次提及
+              </span>
+            )}
           </CardDescription>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleRefresh}
-          disabled={refreshing}
-          className="h-9 px-3 bg-white/80 backdrop-blur-sm border-gray-200/80 hover:bg-gray-50/90 hover:border-gray-300/80 transition-all duration-200"
-          title="刷新数据"
-        >
-          <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''} transition-transform duration-200`} />
-        </Button>
+        
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="h-9 px-3"
+            title="刷新数据"
+          >
+            <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+          </Button>
+        </div>
       </CardHeader>
       
       <CardContent className="relative p-0 pb-6">
-        <div className="px-6 pb-2">
-          <div className="text-xs text-muted-foreground bg-muted/50 px-3 py-2 rounded-lg border border-border/50">
-            <span className="font-medium">💡 使用提示：</span>
-            鼠标悬停查看数据，拖拽移动视图，滚轮缩放，点击省份选中
+        <div className="px-6 pb-4">
+          <div className="grid grid-cols-3 gap-4 text-center">
+            <div className="bg-blue-50 rounded-lg p-3">
+              <div className="text-2xl font-bold text-blue-600">{mapStats.provinces}</div>
+              <div className="text-sm text-blue-700">省份数量</div>
+            </div>
+            <div className="bg-green-50 rounded-lg p-3">
+              <div className="text-2xl font-bold text-green-600">{mapStats.total.toLocaleString()}</div>
+              <div className="text-sm text-green-700">总提及次数</div>
+            </div>
+            <div className="bg-amber-50 rounded-lg p-3">
+              <div className="text-2xl font-bold text-amber-600">{mapStats.max.toLocaleString()}</div>
+              <div className="text-sm text-amber-700">最高提及次数</div>
+            </div>
           </div>
         </div>
         
         <div className="px-6">
           <div 
             ref={chartRef} 
-            className="w-full h-96 border mt-4"
+            className="w-full h-[500px] rounded-lg"
             style={{ 
-              minHeight: '400px', 
-              backgroundColor: '#f9fafb' 
+              minHeight: '500px'
             }}
           />
         </div>
