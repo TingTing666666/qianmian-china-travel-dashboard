@@ -149,14 +149,16 @@ export function ProvinceChart({ limit: initialLimit = 8 }: ProvinceChartProps) {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="h-64">
+        <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+            <BarChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis 
                 dataKey="province" 
                 className="text-muted-foreground"
                 fontSize={12}
+                angle={-45}
+                textAnchor="end"
               />
               <YAxis 
                 className="text-muted-foreground"
