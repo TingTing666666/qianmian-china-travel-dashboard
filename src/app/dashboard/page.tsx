@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card"
 import { Activity, Video, MessageCircle, TrendingUp } from "lucide-react"
+import { ProvinceChart } from "@/components/charts/ProvinceChart"
 
 // 模拟数据
 const metrics = [
@@ -75,8 +76,13 @@ export default function DashboardPage() {
         })}
       </div>
 
+      {/* 省份提及统计图表 */}
+      <div className="mb-6">
+        <ProvinceChart limit={8} />
+      </div>
+
       {/* 主要内容区域 */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">        
         {/* 最近活动 */}
         <Card className="col-span-4">
           <CardHeader>
