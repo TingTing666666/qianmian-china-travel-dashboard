@@ -1,0 +1,89 @@
+/* 双滑轨样式 - 优化版本 */
+.slider-blue::-webkit-slider-thumb {
+  appearance: none;
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+  transition: all 0.2s ease;
+}
+
+.slider-blue::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.slider-purple::-webkit-slider-thumb {
+  appearance: none;
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #a855f7, #7c3aed);
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 2px 8px rgba(168, 85, 247, 0.3);
+  transition: all 0.2s ease;
+}
+
+.slider-purple::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(168, 85, 247, 0.4);
+}
+
+/* Firefox 兼容性 */
+.slider-blue::-moz-range-thumb {
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+  transition: all 0.2s ease;
+}
+
+.slider-purple::-moz-range-thumb {
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #a855f7, #7c3aed);
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 2px 8px rgba(168, 85, 247, 0.3);
+  transition: all 0.2s ease;
+}
+
+/* 轨道样式优化 */
+.slider-blue::-webkit-slider-track,
+.slider-purple::-webkit-slider-track {
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #e2e8f0, #cbd5e1);
+  border: none;
+}
+
+.slider-blue::-moz-range-track,
+.slider-purple::-moz-range-track {
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #e2e8f0, #cbd5e1);
+  border: none;
+}
+
+/* 响应式优化 */
+@media (max-width: 640px) {
+  .slider-blue::-webkit-slider-thumb,
+  .slider-purple::-webkit-slider-thumb {
+    height: 24px;
+    width: 24px;
+  }
+  
+  .slider-blue::-moz-range-thumb,
+  .slider-purple::-moz-range-thumb {
+    height: 24px;
+    width: 24px;
+  }
+}

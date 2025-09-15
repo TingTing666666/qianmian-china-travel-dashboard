@@ -1,7 +1,7 @@
 /*
  * @Date: 2025-01-16 00:00:00
  * @LastEditors: TingTing 110824020+TingTing666666@users.noreply.github.com
- * @LastEditTime: 2025-01-16 00:00:00
+ * @LastEditTime: 2025-09-15 16:16:53
  * @FilePath: \qianmian-china-travel-dashboard\src\app\api\videos\route.ts
  */
 import { NextRequest, NextResponse } from 'next/server'
@@ -18,8 +18,8 @@ export async function GET(request: NextRequest) {
     const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 50
     const sortBy = searchParams.get('sortBy') as any
     const sortOrder = searchParams.get('sortOrder') as 'asc' | 'desc'
-    const search = searchParams.get('search')
-    const channelTitle = searchParams.get('channelTitle')
+    const search = searchParams.get('search') || undefined
+    const channelTitle = searchParams.get('channelTitle') || undefined
     const categoryId = searchParams.get('categoryId') ? parseInt(searchParams.get('categoryId')!) : undefined
 
     // 获取数据
