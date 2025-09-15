@@ -5,6 +5,7 @@ import { Activity, Video, MessageCircle, TrendingUp } from "lucide-react"
 import { ProvinceChart } from "@/components/charts/ProvinceChart"
 import { ChinaMap } from "@/components/charts/ChinaMap"
 import { DebugMap } from "@/components/charts/DebugMap"
+import { useState, useEffect } from 'react';
 
 // 模拟数据
 const metrics = [
@@ -43,6 +44,12 @@ const metrics = [
 ]
 
 export default function DashboardPage() {
+  const [currentTime, setCurrentTime] = useState('');
+
+  useEffect(() => {
+    setCurrentTime(new Date().toLocaleString('zh-CN'));
+  }, []);
+
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
       {/* 页面头部 */}
@@ -50,7 +57,7 @@ export default function DashboardPage() {
         <h2 className="text-3xl font-bold tracking-tight">数据概览</h2>
         <div className="flex items-center space-x-2">
           <span className="text-sm text-muted-foreground">
-            最后更新: {new Date().toLocaleString('zh-CN')}
+            最后更新: {currentTime || '加载中...'}
           </span>
         </div>
       </div>
