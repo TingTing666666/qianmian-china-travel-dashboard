@@ -148,9 +148,9 @@ export function ProvinceChart({ limit: initialLimit = 8 }: ProvinceChartProps) {
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="h-full">
-        <div className="w-full h-full flex items-center justify-center">
-          <ResponsiveContainer width="100%" height="70%">
+      <CardContent className="h-[450px]">
+          <div className="w-full h-full flex items-center justify-center">
+            <ResponsiveContainer width="100%" height="100%">
             <BarChart 
               data={data} 
               margin={{ top: 20, right: 30, left: 10, bottom: 30 }}

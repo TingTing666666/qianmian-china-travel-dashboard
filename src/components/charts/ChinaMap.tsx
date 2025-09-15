@@ -37,10 +37,10 @@ export function ChinaMap({ data = [] }: ChinaMapProps) {
       const geoJson = await response.json()
       echarts.registerMap('china', geoJson)
 
-      let realData = []
+      let realData: { name: string; value: number }[] = []
       
       if (data.length > 0) {
-        realData = data.map((item: any) => ({
+        realData = data.map((item: ProvinceMention) => ({
           name: item.province,
           value: item.mentions
         }))
@@ -49,7 +49,7 @@ export function ChinaMap({ data = [] }: ChinaMapProps) {
         const dataResult = await dataResponse.json()
         
         if (dataResult.success && dataResult.data) {
-          realData = dataResult.data.map((item: any) => ({
+          realData = dataResult.data.map((item: ProvinceMention) => ({
             name: item.province,
             value: item.mentions
           }))
@@ -187,8 +187,8 @@ export function ChinaMap({ data = [] }: ChinaMapProps) {
       myChart.setOption(option)
 
       // 添加交互事件
-      myChart.on('click', function(params: any) {
-        if (params.data) {
+      myChart.on('click', function(params: echarts.ECElementEvent) {
+        if (params.data && typeof params.data === 'object' && 'name' in params.data && 'value' in params.data) {
           setSelectedProvince(params.name)
         }
       })
@@ -240,7 +240,7 @@ export function ChinaMap({ data = [] }: ChinaMapProps) {
   useEffect(() => {
     if (chartInstanceRef.current && data.length > 0) {
       // 只更新数据，不重新初始化整个地图
-      const processedData = data.map((item: any) => ({
+      const processedData = data.map((item: ProvinceMention) => ({
         name: item.province,
         value: item.mentions
       }))
