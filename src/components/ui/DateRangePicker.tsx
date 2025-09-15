@@ -32,7 +32,7 @@ export function DateRangePicker({
   }
 
   const formatDateDisplay = (start: string, end: string) => {
-    if (!start && !end) return '选择时间范围'
+    if (!start && !end) return '全部时间'
     if (!start) return `至 ${end}`
     if (!end) return `从 ${start}`
     return `${start} 至 ${end}`
@@ -43,6 +43,11 @@ export function DateRangePicker({
     const formatDate = (date: Date) => date.toISOString().split('T')[0]
     
     return [
+      {
+        label: '全部',
+        start: '',
+        end: ''
+      },
       {
         label: '最近7天',
         start: formatDate(new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000)),
@@ -100,7 +105,7 @@ export function DateRangePicker({
                       setTempStartDate(preset.start)
                       setTempEndDate(preset.end)
                     }}
-                    className="px-3 py-2 text-sm text-gray-600 hover:bg-blue-50 hover:text-blue-700 rounded-md transition-colors duration-150"
+                    className="px-3 py-2 text-sm text-gray-600 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-all duration-200 border border-transparent hover:border-blue-200 hover:shadow-sm"
                   >
                     {preset.label}
                   </button>
@@ -118,7 +123,7 @@ export function DateRangePicker({
                     type="date"
                     value={tempStartDate}
                     onChange={(e) => setTempStartDate(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 hover:border-gray-300"
                   />
                 </div>
                 <div>
@@ -127,7 +132,7 @@ export function DateRangePicker({
                     type="date"
                     value={tempEndDate}
                     onChange={(e) => setTempEndDate(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 hover:border-gray-300"
                   />
                 </div>
               </div>
@@ -137,13 +142,13 @@ export function DateRangePicker({
             <div className="flex justify-end space-x-2 mt-4 pt-4 border-t border-gray-100">
               <button
                 onClick={handleCancel}
-                className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-md transition-colors duration-150"
+                className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200 border border-transparent hover:border-gray-200"
               >
                 取消
               </button>
               <button
                 onClick={handleApply}
-                className="px-4 py-2 text-sm bg-blue-600 text-white hover:bg-blue-700 rounded-md transition-colors duration-150"
+                className="px-4 py-2 text-sm bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
               >
                 应用
               </button>
