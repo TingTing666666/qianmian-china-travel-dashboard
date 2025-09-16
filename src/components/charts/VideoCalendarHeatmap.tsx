@@ -313,27 +313,19 @@ export function VideoCalendarHeatmap({ className }: VideoCalendarHeatmapProps) {
 
           {/* 图表区域 */}
           <div className="h-96 relative">
-            {loading ? (
-              <div className="flex items-center justify-center h-full">
-                <div className="text-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4 mx-auto"></div>
-                  <p className="text-gray-500">正在加载热力图数据...</p>
-                </div>
-              </div>
-            ) : data.length === 0 ? (
-              <div className="flex items-center justify-center h-full">
+            <div 
+              ref={chartRef}
+              className={`w-full h-full transition-opacity duration-300 ${loading ? 'opacity-30' : 'opacity-100'}`}
+              style={{ width: '100%', height: '100%' }}
+            />
+            {data.length === 0 && !loading && (
+              <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center">
                   <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                   <p className="text-gray-500 text-lg">暂无热力图数据</p>
                   <p className="text-gray-400 text-sm">请检查数据源或选择其他年份</p>
                 </div>
               </div>
-            ) : (
-              <div 
-                ref={chartRef}
-                className="w-full h-full"
-                style={{ width: '100%', height: '100%' }}
-              />
             )}
           </div>
         </CardContent>
