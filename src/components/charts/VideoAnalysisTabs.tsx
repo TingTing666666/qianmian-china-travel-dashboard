@@ -8,7 +8,8 @@
 
 import React from 'react'
 import { TrendAnalysisChart } from './TrendAnalysisChart'
-import { EChartsCalendarHeatmap } from './EChartsCalendarHeatmap'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
+import { BarChart3, Activity } from 'lucide-react'
 
 interface VideoAnalysisTabsProps {
   className?: string
@@ -19,9 +20,6 @@ export function VideoAnalysisTabs({ className }: VideoAnalysisTabsProps) {
     <div className={`w-full space-y-6 ${className || ''}`}>
       {/* 视频发布趋势分析 */}
       <TrendAnalysisChart />
-      
-      {/* Echarts日历热力图 */}
-      <EChartsCalendarHeatmap />
     </div>
   )
 }

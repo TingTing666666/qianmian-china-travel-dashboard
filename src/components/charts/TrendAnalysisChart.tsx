@@ -1,7 +1,7 @@
 /*
  * @Date: 2025-01-16 00:00:00
  * @LastEditors: TingTing 110824020+TingTing666666@users.noreply.github.com
- * @LastEditTime: 2025-01-16 00:00:00
+ * @LastEditTime: 2025-09-16 15:31:28
  * @FilePath: \qianmian-china-travel-dashboard\src\components\charts\TrendAnalysisChart.tsx
  */
 "use client"
@@ -18,6 +18,7 @@ interface TrendData {
   period: string
   count: number
   date: string
+  isPrediction?: boolean
 }
 
 interface TrendAnalysisChartProps {
@@ -334,11 +335,11 @@ export function TrendAnalysisChart({ className }: TrendAnalysisChartProps) {
       series: [
         {
           name: '实际数据',
-          type: 'bar',
+          type: 'bar' as const,
           data: actualData,
           itemStyle: {
             color: {
-              type: 'linear',
+              type: 'linear' as const,
               x: 0,
               y: 0,
               x2: 0,
@@ -353,7 +354,7 @@ export function TrendAnalysisChart({ className }: TrendAnalysisChartProps) {
           emphasis: {
             itemStyle: {
               color: {
-                type: 'linear',
+                type: 'linear' as const,
                 x: 0,
                 y: 0,
                 x2: 0,
@@ -368,11 +369,11 @@ export function TrendAnalysisChart({ className }: TrendAnalysisChartProps) {
         },
         ...(showPrediction && predictionData.length > 0 ? [{
           name: '预测数据',
-          type: 'bar',
+          type: 'bar' as const,
           data: predictionData,
           itemStyle: {
             color: {
-              type: 'linear',
+              type: 'linear' as const,
               x: 0,
               y: 0,
               x2: 0,
@@ -390,7 +391,7 @@ export function TrendAnalysisChart({ className }: TrendAnalysisChartProps) {
           emphasis: {
             itemStyle: {
               color: {
-                type: 'linear',
+                type: 'linear' as const,
                 x: 0,
                 y: 0,
                 x2: 0,
