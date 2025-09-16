@@ -27,7 +27,7 @@ export function VideoCalendarHeatmap({ className }: VideoCalendarHeatmapProps) {
   const [data, setData] = useState<HeatmapData[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString())
+  const [selectedYear, setSelectedYear] = useState<string>('2024')
   const [stats, setStats] = useState({
     totalVideos: 0,
     activeDays: 0,
@@ -75,7 +75,8 @@ export function VideoCalendarHeatmap({ className }: VideoCalendarHeatmapProps) {
   const yearOptions = useMemo(() => {
     const currentYear = new Date().getFullYear()
     const years = []
-    for (let year = currentYear; year >= currentYear - 5; year--) {
+    // 扩展年份范围：从2020年到当前年份+1年
+    for (let year = currentYear + 1; year >= 2020; year--) {
       years.push({ value: year.toString(), label: `${year}年` })
     }
     return years
@@ -139,17 +140,17 @@ export function VideoCalendarHeatmap({ className }: VideoCalendarHeatmapProps) {
       },
       visualMap: {
         min: 0,
-        max: maxCount,
+        max: 50,
         type: 'piecewise',
         orient: 'horizontal',
         left: 'center',
         top: 'top',
         pieces: [
-          { min: 0, max: 0, color: '#ebedf0' },
-          { min: 1, max: Math.ceil(maxCount * 0.25), color: '#c6e48b' },
-          { min: Math.ceil(maxCount * 0.25) + 1, max: Math.ceil(maxCount * 0.5), color: '#7bc96f' },
-          { min: Math.ceil(maxCount * 0.5) + 1, max: Math.ceil(maxCount * 0.75), color: '#239a3b' },
-          { min: Math.ceil(maxCount * 0.75) + 1, max: maxCount, color: '#196127' }
+          { min: 0, max: 0, color: '#ebedf0', label: '0' },
+          { min: 1, max: 5, color: '#c6e48b', label: '1-5' },
+          { min: 6, max: 20, color: '#7bc96f', label: '6-20' },
+          { min: 21, max: 50, color: '#239a3b', label: '21-50' },
+          { min: 51, max: 999, color: '#196127', label: '50+' }
         ],
         textStyle: {
           color: '#64748b',
@@ -163,10 +164,10 @@ export function VideoCalendarHeatmap({ className }: VideoCalendarHeatmapProps) {
         top: 80,
         left: 30,
         right: 30,
-        cellSize: ['auto', 13],
+        cellSize: ['auto', 16],
         range: selectedYear,
         itemStyle: {
-          borderWidth: 0.5,
+          borderWidth: 1.5,
           borderColor: '#fff'
         },
         yearLabel: {
@@ -175,12 +176,14 @@ export function VideoCalendarHeatmap({ className }: VideoCalendarHeatmapProps) {
         monthLabel: {
           nameMap: 'cn',
           fontSize: 12,
-          color: '#64748b'
+          color: '#64748b',
+          margin: 8
         },
         dayLabel: {
           nameMap: 'cn',
           fontSize: 11,
-          color: '#64748b'
+          color: '#64748b',
+          margin: 6
         },
         splitLine: {
           show: true,
@@ -309,7 +312,7 @@ export function VideoCalendarHeatmap({ className }: VideoCalendarHeatmapProps) {
           </div>
 
           {/* 图表区域 */}
-          <div className="h-80 relative">
+          <div className="h-96 relative">
             {loading ? (
               <div className="flex items-center justify-center h-full">
                 <div className="text-center">
@@ -333,21 +336,6 @@ export function VideoCalendarHeatmap({ className }: VideoCalendarHeatmapProps) {
               />
             )}
           </div>
-
-          {/* 说明信息 */}
-          {!loading && data.length > 0 && (
-            <div className="mt-6 p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl border border-green-100 shadow-sm">
-              <div className="flex items-center text-sm text-green-700">
-                <div className="p-1.5 bg-green-100 rounded-lg mr-3">
-                  <Calendar className="w-4 h-4 text-green-600" />
-                </div>
-                <span className="font-semibold">热力图说明：</span>
-                <span className="ml-2 text-green-600">
-                  颜色深浅表示当天发布的视频数量，颜色越深表示发布量越大
-                </span>
-              </div>
-            </div>
-          )}
         </CardContent>
       </Card>
     </div>
