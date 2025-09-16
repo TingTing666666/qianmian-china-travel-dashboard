@@ -17,11 +17,16 @@ interface HeatmapData {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const year = searchParams.get('year') || new Date().getFullYear().toString()
+    const startYear = searchParams.get('startYear') || new Date().getFullYear().toString()
+    const yearCount = parseInt(searchParams.get('yearCount') || '1')
+
+    // 计算年份范围
+    const startYearInt = parseInt(startYear)
+    const endYearInt = startYearInt + yearCount - 1
 
     // 构建查询条件
-    const whereClause = `WHERE EXTRACT(YEAR FROM published_at) = $1`
-    const queryParams = [parseInt(year)]
+    const whereClause = `WHERE EXTRACT(YEAR FROM published_at) BETWEEN $1 AND $2`
+    const queryParams = [startYearInt, endYearInt]
 
     // 执行聚合查询
     const heatmapQuery = `
@@ -46,10 +51,10 @@ export async function GET(request: NextRequest) {
       dataMap.set(dateStr, parseInt(row.count))
     })
 
-    // 生成完整年份的日期序列
+    // 生成完整年份范围的日期序列
     const heatmapData: HeatmapData[] = []
-    const startDate = new Date(parseInt(year), 0, 1)
-    const endDate = new Date(parseInt(year), 11, 31)
+    const startDate = new Date(startYearInt, 0, 1)
+    const endDate = new Date(endYearInt, 11, 31)
     
     let currentDate = new Date(startDate)
     const counts = Array.from(dataMap.values())
@@ -80,15 +85,20 @@ export async function GET(request: NextRequest) {
     const statsResult = await query(totalQuery, queryParams)
     const stats = statsResult.rows[0]
 
+    // 计算总天数
+    const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
+
     return NextResponse.json({
       success: true,
       data: heatmapData,
       meta: {
-        year: parseInt(year),
+        startYear: startYearInt,
+        endYear: endYearInt,
+        yearCount,
         totalVideos: parseInt(stats.total_videos),
         activeDays: parseInt(stats.active_days),
         maxDailyCount: maxCount,
-        averageDailyCount: Math.round(parseInt(stats.total_videos) / 365 * 100) / 100
+        averageDailyCount: Math.round(parseInt(stats.total_videos) / totalDays * 100) / 100
       }
     })
 

@@ -27,8 +27,11 @@ export function VideoCalendarHeatmap({ className }: VideoCalendarHeatmapProps) {
   const [data, setData] = useState<HeatmapData[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [selectedYear, setSelectedYear] = useState<string>('2024')
+  const [selectedStartYear, setSelectedStartYear] = useState<string>('2022') // 改为起始年份
   const [stats, setStats] = useState({
+    startYear: 0,
+    endYear: 0,
+    yearCount: 3,
     totalVideos: 0,
     activeDays: 0,
     maxDailyCount: 0,
@@ -46,7 +49,8 @@ export function VideoCalendarHeatmap({ className }: VideoCalendarHeatmapProps) {
     
     try {
       const params = new URLSearchParams({
-        year: selectedYear
+        startYear: selectedStartYear,
+        yearCount: '3'
       })
 
       const response = await fetch(`/api/videos/heatmap?${params}`)
@@ -64,20 +68,22 @@ export function VideoCalendarHeatmap({ className }: VideoCalendarHeatmapProps) {
     } finally {
       setLoading(false)
     }
-  }, [selectedYear])
+  }, [selectedStartYear])
 
   // 初始化数据
   useEffect(() => {
     fetchHeatmapData()
   }, [fetchHeatmapData])
 
-  // 生成年份选项
+  // 生成年份选项 - 起始年份选择，最晚年份-3
   const yearOptions = useMemo(() => {
     const currentYear = new Date().getFullYear()
     const years = []
-    // 扩展年份范围：从2020年到当前年份+1年
-    for (let year = currentYear + 1; year >= 2020; year--) {
-      years.push({ value: year.toString(), label: `${year}年` })
+    // 最晚可选择的起始年份是当前年份-2（这样三年数据最晚到当前年份）
+    const latestStartYear = currentYear - 2
+    // 从2020年开始到最晚起始年份
+    for (let year = latestStartYear; year >= 2020; year--) {
+      years.push({ value: year.toString(), label: `${year}年起` })
     }
     return years
   }, [])
@@ -106,6 +112,58 @@ export function VideoCalendarHeatmap({ className }: VideoCalendarHeatmapProps) {
 
     // 计算颜色等级
     const maxCount = Math.max(...data.map(d => d.count), 1)
+    
+    // 计算年份范围
+    const startYear = stats.startYear || parseInt(selectedStartYear)
+    const endYear = stats.endYear || (parseInt(selectedStartYear) + 2)
+    const years = []
+    for (let year = startYear; year <= endYear; year++) {
+      years.push(year)
+    }
+    
+    // 为每年创建独立的日历配置
+    const calendars = years.map((year, index) => ({
+      top: 120 + index * 200, // 每年间隔200px
+      left: 50,
+      right: 50,
+      cellSize: ['auto', 13],
+      range: year.toString(),
+      orient: 'horizontal', // 横向排列
+      itemStyle: {
+        borderWidth: 1,
+        borderColor: '#fff'
+      },
+      yearLabel: {
+        show: true,
+        fontSize: 16,
+        color: '#374151',
+        fontWeight: 'bold',
+        position: 'left',
+        margin: 20
+      },
+      monthLabel: {
+        nameMap: 'cn',
+        fontSize: 11,
+        color: '#64748b',
+        margin: 10,
+        position: 'start'
+      },
+      dayLabel: {
+        nameMap: 'cn',
+        fontSize: 10,
+        color: '#64748b',
+        margin: 8,
+        position: 'start'
+      },
+      splitLine: {
+        show: true,
+        lineStyle: {
+          color: '#f3f4f6',
+          width: 1,
+          type: 'solid'
+        }
+      }
+    }))
     
     const option = {
       tooltip: {
@@ -160,48 +218,158 @@ export function VideoCalendarHeatmap({ className }: VideoCalendarHeatmapProps) {
         itemWidth: 12,
         itemHeight: 12
       },
-      calendar: {
-        top: 80,
-        left: 30,
-        right: 30,
-        cellSize: ['auto', 16],
-        range: selectedYear,
-        itemStyle: {
-          borderWidth: 1.5,
-          borderColor: '#fff'
+      // 横向布局：为每一年创建一个独立的calendar
+      calendar: [
+        {
+          top: 80,
+          left: 30,
+          right: 30,
+          cellSize: ['auto', 16],
+          range: stats.startYear || parseInt(selectedStartYear),
+          itemStyle: {
+            borderWidth: 1.5,
+            borderColor: '#fff'
+          },
+          yearLabel: {
+            show: true,
+            fontSize: 14,
+            color: '#374151',
+            fontWeight: 'bold'
+          },
+          monthLabel: {
+            nameMap: 'cn',
+            fontSize: 12,
+            color: '#64748b',
+            margin: 8
+          },
+          dayLabel: {
+            nameMap: 'cn',
+            fontSize: 11,
+            color: '#64748b',
+            margin: 6
+          },
+          splitLine: {
+            show: true,
+            lineStyle: {
+              color: '#e5e7eb',
+              width: 1,
+              type: 'solid'
+            }
+          }
         },
-        yearLabel: {
-          show: false
+        {
+          top: 260,
+          left: 30,
+          right: 30,
+          cellSize: ['auto', 16],
+          range: (stats.startYear || parseInt(selectedStartYear)) + 1,
+          itemStyle: {
+            borderWidth: 1.5,
+            borderColor: '#fff'
+          },
+          yearLabel: {
+            show: true,
+            fontSize: 14,
+            color: '#374151',
+            fontWeight: 'bold'
+          },
+          monthLabel: {
+            nameMap: 'cn',
+            fontSize: 12,
+            color: '#64748b',
+            margin: 8
+          },
+          dayLabel: {
+            nameMap: 'cn',
+            fontSize: 11,
+            color: '#64748b',
+            margin: 6
+          },
+          splitLine: {
+            show: true,
+            lineStyle: {
+              color: '#e5e7eb',
+              width: 1,
+              type: 'solid'
+            }
+          }
         },
-        monthLabel: {
-          nameMap: 'cn',
-          fontSize: 12,
-          color: '#64748b',
-          margin: 8
-        },
-        dayLabel: {
-          nameMap: 'cn',
-          fontSize: 11,
-          color: '#64748b',
-          margin: 6
-        },
-        splitLine: {
-          show: true,
-          lineStyle: {
-            color: '#e5e7eb',
-            width: 1,
-            type: 'solid'
+        {
+          top: 440,
+          left: 30,
+          right: 30,
+          cellSize: ['auto', 16],
+          range: (stats.startYear || parseInt(selectedStartYear)) + 2,
+          itemStyle: {
+            borderWidth: 1.5,
+            borderColor: '#fff'
+          },
+          yearLabel: {
+            show: true,
+            fontSize: 14,
+            color: '#374151',
+            fontWeight: 'bold'
+          },
+          monthLabel: {
+            nameMap: 'cn',
+            fontSize: 12,
+            color: '#64748b',
+            margin: 8
+          },
+          dayLabel: {
+            nameMap: 'cn',
+            fontSize: 11,
+            color: '#64748b',
+            margin: 6
+          },
+          splitLine: {
+            show: true,
+            lineStyle: {
+              color: '#e5e7eb',
+              width: 1,
+              type: 'solid'
+            }
           }
         }
-      },
-      series: [{
-        type: 'heatmap',
-        coordinateSystem: 'calendar',
-        data: chartData,
-        itemStyle: {
-          borderRadius: 2
+      ],
+      series: [
+        {
+          type: 'heatmap',
+          coordinateSystem: 'calendar',
+          calendarIndex: 0,
+          data: chartData.filter(item => {
+            const year = new Date(item[0]).getFullYear()
+            return year === (stats.startYear || parseInt(selectedStartYear))
+          }),
+          itemStyle: {
+            borderRadius: 2
+          }
+        },
+        {
+          type: 'heatmap',
+          coordinateSystem: 'calendar',
+          calendarIndex: 1,
+          data: chartData.filter(item => {
+            const year = new Date(item[0]).getFullYear()
+            return year === (stats.startYear || parseInt(selectedStartYear)) + 1
+          }),
+          itemStyle: {
+            borderRadius: 2
+          }
+        },
+        {
+          type: 'heatmap',
+          coordinateSystem: 'calendar',
+          calendarIndex: 2,
+          data: chartData.filter(item => {
+            const year = new Date(item[0]).getFullYear()
+            return year === (stats.startYear || parseInt(selectedStartYear)) + 2
+          }),
+          itemStyle: {
+            borderRadius: 2
+          }
         }
-      }]
+      ]
     }
 
     chart.setOption(option)
@@ -216,7 +384,7 @@ export function VideoCalendarHeatmap({ className }: VideoCalendarHeatmapProps) {
       window.removeEventListener('resize', handleResize)
       chart.dispose()
     }
-  }, [chartData, selectedYear, data])
+  }, [chartData, selectedStartYear, data, stats])
 
   // 当数据或配置变化时更新图表
   useEffect(() => {
@@ -260,7 +428,14 @@ export function VideoCalendarHeatmap({ className }: VideoCalendarHeatmapProps) {
               <div className="p-2 bg-green-50 rounded-lg mr-3">
                 <Calendar className="w-5 h-5 text-green-600" />
               </div>
-              <span className="text-xl font-semibold">视频发布日历热力图</span>
+              <div className="flex flex-col">
+                <span className="text-xl font-semibold">视频发布日历热力图</span>
+                {stats.startYear && stats.endYear && (
+                  <span className="text-sm text-gray-600 mt-1">
+                    {stats.startYear}年 - {stats.endYear}年 ({stats.yearCount}年数据)
+                  </span>
+                )}
+              </div>
             </div>
           </CardTitle>
         </CardHeader>
@@ -269,14 +444,14 @@ export function VideoCalendarHeatmap({ className }: VideoCalendarHeatmapProps) {
           <div className="mb-8 flex flex-col gap-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
               <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-                {/* 年份选择 */}
+                {/* 起始年份选择 */}
                 <div className="flex items-center space-x-2">
-                  <span className="text-sm font-medium text-gray-700 whitespace-nowrap">选择年份：</span>
+                  <span className="text-sm font-medium text-gray-700 whitespace-nowrap">起始年份：</span>
                   <CustomSelect
-                    value={selectedYear}
-                    onValueChange={setSelectedYear}
+                    value={selectedStartYear}
+                    onValueChange={setSelectedStartYear}
                     options={yearOptions}
-                    className="w-32"
+                    className="w-36"
                   />
                 </div>
                 
@@ -312,7 +487,7 @@ export function VideoCalendarHeatmap({ className }: VideoCalendarHeatmapProps) {
           </div>
 
           {/* 图表区域 */}
-          <div className="h-96 relative">
+          <div className="h-[820px] relative">
             <div 
               ref={chartRef}
               className={`w-full h-full transition-opacity duration-300 ${loading ? 'opacity-30' : 'opacity-100'}`}
@@ -323,7 +498,7 @@ export function VideoCalendarHeatmap({ className }: VideoCalendarHeatmapProps) {
                 <div className="text-center">
                   <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                   <p className="text-gray-500 text-lg">暂无热力图数据</p>
-                  <p className="text-gray-400 text-sm">请检查数据源或选择其他年份</p>
+                  <p className="text-gray-400 text-sm">请检查数据源或选择其他起始年份</p>
                 </div>
               </div>
             )}
