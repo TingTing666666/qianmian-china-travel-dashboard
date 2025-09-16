@@ -30,6 +30,7 @@ export async function GET(request: NextRequest) {
         COUNT(*) as count
       FROM video_fdata
       ${whereClause}
+      AND published_at IS NOT NULL
       GROUP BY DATE(published_at)
       ORDER BY DATE(published_at)
     `
@@ -38,7 +39,11 @@ export async function GET(request: NextRequest) {
     const dataMap = new Map<string, number>()
     
     result.rows.forEach(row => {
-      dataMap.set(row.date, parseInt(row.count))
+      // 确保日期格式正确
+      const dateStr = row.date instanceof Date 
+        ? row.date.toISOString().split('T')[0]
+        : row.date
+      dataMap.set(dateStr, parseInt(row.count))
     })
 
     // 生成完整年份的日期序列
