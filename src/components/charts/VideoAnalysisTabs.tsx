@@ -6,75 +6,22 @@
  */
 "use client"
 
-import React, { useState } from 'react'
-import { BarChart3, Calendar, TrendingUp, Activity } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
+import React from 'react'
 import { TrendAnalysisChart } from './TrendAnalysisChart'
-import { HeatmapChart } from './HeatmapChart'
-
-interface TabItem {
-  id: string
-  label: string
-  icon: React.ReactNode
-}
+import { EChartsCalendarHeatmap } from './EChartsCalendarHeatmap'
 
 interface VideoAnalysisTabsProps {
   className?: string
 }
 
 export function VideoAnalysisTabs({ className }: VideoAnalysisTabsProps) {
-  const [activeTab, setActiveTab] = useState('trend')
-
-  const tabs: TabItem[] = [
-    {
-      id: 'trend',
-      label: '变化视图',
-      icon: <BarChart3 className="w-4 h-4" />
-    },
-    {
-      id: 'heatmap',
-      label: '热力视图',
-      icon: <Calendar className="w-4 h-4" />
-    }
-  ]
-
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case 'trend':
-        return <TrendAnalysisChart className="mt-6" />
-      case 'heatmap':
-        return <HeatmapChart className="mt-6" />
-      default:
-        return null
-    }
-  }
-
   return (
-    <div className={`w-full ${className || ''}`}>
-      {/* 标签导航 */}
-      <div className="border-b border-gray-200 bg-white rounded-t-lg">
-        <nav className="flex space-x-8 px-6">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200 ${
-                activeTab === tab.id
-                  ? 'border-blue-500 text-blue-600 bg-blue-50 rounded-t-md -mb-px'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50 rounded-t-md'
-              }`}
-            >
-              {tab.icon}
-              <span className="ml-2">{tab.label}</span>
-            </button>
-          ))}
-        </nav>
-      </div>
-
-      {/* 标签内容 */}
-      <div className="bg-gray-50 min-h-screen p-6">
-        {renderTabContent()}
-      </div>
+    <div className={`w-full space-y-6 ${className || ''}`}>
+      {/* 视频发布趋势分析 */}
+      <TrendAnalysisChart />
+      
+      {/* Echarts日历热力图 */}
+      <EChartsCalendarHeatmap />
     </div>
   )
 }

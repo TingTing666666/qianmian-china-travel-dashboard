@@ -77,7 +77,7 @@ const CustomSelect = React.forwardRef<HTMLDivElement, CustomSelectProps>(
           )}
         >
           <span className={cn(
-            "truncate",
+            "truncate font-normal",
             !selectedOption && "text-gray-500"
           )}>
             {selectedOption ? selectedOption.label : placeholder}
@@ -104,7 +104,7 @@ const CustomSelect = React.forwardRef<HTMLDivElement, CustomSelectProps>(
                     selectedOption?.value === option.value && "bg-blue-50 text-blue-600"
                   )}
                 >
-                  <span className="truncate">{option.label}</span>
+                  <span className="truncate font-normal">{option.label}</span>
                   {selectedOption?.value === option.value && (
                     <Check className="w-4 h-4 text-blue-600" />
                   )}
