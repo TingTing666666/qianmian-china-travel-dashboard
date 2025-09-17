@@ -16,7 +16,7 @@ interface TabItem {
 const tabs: TabItem[] = [
   {
     id: 'trend',
-    label: '视频发布趋势分析',
+    label: '趋势分析',
     icon: BarChart3,
     component: TrendAnalysisChart
   },

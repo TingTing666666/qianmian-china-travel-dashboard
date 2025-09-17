@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/Button'
 import { CustomSelect } from '@/components/ui/CustomSelect'
 import { DateRangePicker } from '@/components/ui/DateRangePicker'
 import { Calendar, TrendingUp, BarChart3, Activity, Zap, ZoomIn, ZoomOut, RotateCcw, ChevronLeft, ChevronRight } from 'lucide-react'
+import { YearlyTrendChart } from './YearlyTrendChart'
 
 interface TrendData {
   period: string
@@ -527,7 +528,7 @@ export function TrendAnalysisChart({ className }: TrendAnalysisChartProps) {
               <div className="p-2 bg-blue-50 rounded-lg mr-3">
                 <BarChart3 className="w-5 h-5 text-blue-600" />
               </div>
-              <span className="text-xl font-semibold">视频发布趋势分析</span>
+              <span className="text-xl font-semibold">总时序图</span>
             </div>
             <div className="flex items-center space-x-3">
               <Button
@@ -655,6 +656,11 @@ export function TrendAnalysisChart({ className }: TrendAnalysisChartProps) {
           )}
         </CardContent>
       </Card>
+
+      {/* 年度趋势图 */}
+      <div className="mt-6">
+        <YearlyTrendChart />
+      </div>
     </div>
   )
 }
