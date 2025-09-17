@@ -25,13 +25,13 @@ export default function VideosPage() {
           <CardHeader>
             <CardTitle className="flex items-center">
               <BarChart className="mr-2 h-4 w-4" />
-              视频分析
+              时序分析
             </CardTitle>
-            <CardDescription>深入分析视频内容和表现</CardDescription>
+            <CardDescription>深入分析视频发布的时间序列数据</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              查看详细的视频分析报告和趋势
+              查看视频发布趋势和时间分布热力图
             </p>
           </CardContent>
         </Card>

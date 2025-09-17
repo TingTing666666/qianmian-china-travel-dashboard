@@ -26,7 +26,7 @@ const navigationItems: NavItem[] = [
     icon: Video,
     children: [
       {
-        title: "视频分析",
+        title: "时序分析",
         href: "/videos/analysis",
       },
       {
