@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { CustomSelect } from '@/components/ui/CustomSelect'
 import { Calendar, Activity, RefreshCw } from 'lucide-react'
+import { MiniDistributionChart } from './MiniDistributionChart'
 
 interface HeatmapData {
   date: string
@@ -37,6 +38,101 @@ export function VideoCalendarHeatmap({ className }: VideoCalendarHeatmapProps) {
     maxDailyCount: 0,
     averageDailyCount: 0
   })
+
+  // 计算详细统计信息
+  const detailedStats = useMemo(() => {
+    if (!data.length) return null
+
+    // 按年份分组数据
+    const yearlyData: { [year: number]: HeatmapData[] } = {}
+    data.forEach(item => {
+      const year = new Date(item.date).getFullYear()
+      if (!yearlyData[year]) yearlyData[year] = []
+      yearlyData[year].push(item)
+    })
+
+    // 计算年度统计
+    const yearlyStats = Object.entries(yearlyData).map(([year, yearData]) => {
+      const totalCount = yearData.reduce((sum, item) => sum + item.count, 0)
+      const activeDays = yearData.filter(item => item.count > 0).length
+      const maxDaily = Math.max(...yearData.map(item => item.count))
+      return {
+        year: parseInt(year),
+        totalCount,
+        activeDays,
+        maxDaily,
+        avgDaily: activeDays > 0 ? Math.round((totalCount / activeDays) * 10) / 10 : 0
+      }
+    })
+
+    // 按月份分组数据
+    const monthlyData: { [month: string]: HeatmapData[] } = {}
+    data.forEach(item => {
+      const date = new Date(item.date)
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+      if (!monthlyData[monthKey]) monthlyData[monthKey] = []
+      monthlyData[monthKey].push(item)
+    })
+
+    // 计算月度统计
+    const monthlyStats = Object.entries(monthlyData).map(([month, monthData]) => {
+      const totalCount = monthData.reduce((sum, item) => sum + item.count, 0)
+      const activeDays = monthData.filter(item => item.count > 0).length
+      const maxDaily = Math.max(...monthData.map(item => item.count))
+      return {
+        month,
+        totalCount,
+        activeDays,
+        maxDaily,
+        avgDaily: activeDays > 0 ? Math.round((totalCount / activeDays) * 10) / 10 : 0
+      }
+    })
+
+    // 找出最高值
+    const maxYearData = yearlyStats.reduce((max, current) => 
+      current.totalCount > max.totalCount ? current : max, yearlyStats[0] || { year: 0, totalCount: 0 })
+    
+    const maxMonthData = monthlyStats.reduce((max, current) => 
+      current.totalCount > max.totalCount ? current : max, monthlyStats[0] || { month: '', totalCount: 0 })
+
+    const maxDayData = data.reduce((max, current) => 
+      current.count > max.count ? current : max, { date: '', count: 0 })
+
+    // 计算平均值
+    const yearAvg = yearlyStats.length > 0 ? 
+      Math.round((yearlyStats.reduce((sum, item) => sum + item.totalCount, 0) / yearlyStats.length) * 10) / 10 : 0
+    
+    const monthAvg = monthlyStats.length > 0 ? 
+      Math.round((monthlyStats.reduce((sum, item) => sum + item.totalCount, 0) / monthlyStats.length) * 10) / 10 : 0
+    
+    const dayAvg = stats.averageDailyCount
+
+    // 生成分布数据
+    const yearDistribution = yearlyStats.map(item => item.totalCount)
+    const monthDistribution = monthlyStats.map(item => item.totalCount)
+    const dayDistribution = data.map(item => item.count)
+
+    return {
+      yearAvg,
+      monthAvg,
+      dayAvg,
+      maxYear: { year: maxYearData.year, count: maxYearData.totalCount },
+      maxMonth: { 
+        month: maxMonthData.month ? new Date(maxMonthData.month + '-01').toLocaleDateString('zh-CN', { year: 'numeric', month: 'long' }) : '', 
+        count: maxMonthData.totalCount 
+      },
+      maxDay: { 
+        date: maxDayData.date ? new Date(maxDayData.date).toLocaleDateString('zh-CN', { month: 'long', day: 'numeric' }) : '', 
+        count: maxDayData.count 
+      },
+      // 分布数据
+      distributions: {
+        year: yearDistribution,
+        month: monthDistribution,
+        day: dayDistribution
+      }
+    }
+  }, [data, stats.averageDailyCount])
   
   // ECharts相关状态
   const chartRef = useRef<HTMLDivElement>(null)
@@ -487,7 +583,7 @@ export function VideoCalendarHeatmap({ className }: VideoCalendarHeatmapProps) {
           </div>
 
           {/* 图表区域 */}
-          <div className="h-[820px] relative">
+          <div className="h-[650px] relative">
             <div 
               ref={chartRef}
               className={`w-full h-full transition-opacity duration-300 ${loading ? 'opacity-30' : 'opacity-100'}`}
@@ -503,6 +599,109 @@ export function VideoCalendarHeatmap({ className }: VideoCalendarHeatmapProps) {
               </div>
             )}
           </div>
+
+          {/* 简约统计信息显示区 */}
+          {!loading && data.length > 0 && detailedStats && (
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <div className="grid grid-cols-6 gap-6">
+                {/* 年平均 */}
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-blue-600 mb-1">{detailedStats.yearAvg}</div>
+                  <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">年平均</div>
+                  <div className="text-xs text-gray-400">个/年</div>
+                  <div className="mt-2 flex justify-center">
+                    <MiniDistributionChart
+                      data={detailedStats.distributions.year}
+                      currentValue={detailedStats.yearAvg}
+                      color="#2563eb"
+                      width={100}
+                      height={32}
+                    />
+                  </div>
+                </div>
+                
+                {/* 月平均 */}
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-green-600 mb-1">{detailedStats.monthAvg}</div>
+                  <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">月平均</div>
+                  <div className="text-xs text-gray-400">个/月</div>
+                  <div className="mt-2 flex justify-center">
+                    <MiniDistributionChart
+                      data={detailedStats.distributions.month}
+                      currentValue={detailedStats.monthAvg}
+                      color="#16a34a"
+                      width={100}
+                      height={32}
+                    />
+                  </div>
+                </div>
+                
+                {/* 日平均 */}
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-purple-600 mb-1">{detailedStats.dayAvg}</div>
+                  <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">日平均</div>
+                  <div className="text-xs text-gray-400">个/日</div>
+                  <div className="mt-2 flex justify-center">
+                    <MiniDistributionChart
+                      data={detailedStats.distributions.day}
+                      currentValue={detailedStats.dayAvg}
+                      color="#9333ea"
+                      width={100}
+                      height={32}
+                    />
+                  </div>
+                </div>
+                
+                {/* 最高年 */}
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-orange-600 mb-1">{detailedStats.maxYear.count}</div>
+                  <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">最高年</div>
+                  <div className="text-xs text-gray-400">{detailedStats.maxYear.year}年</div>
+                  <div className="mt-2 flex justify-center">
+                    <MiniDistributionChart
+                      data={detailedStats.distributions.year}
+                      currentValue={detailedStats.maxYear.count}
+                      color="#ea580c"
+                      width={100}
+                      height={32}
+                    />
+                  </div>
+                </div>
+                
+                {/* 最高月 */}
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-red-600 mb-1">{detailedStats.maxMonth.count}</div>
+                  <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">最高月</div>
+                  <div className="text-xs text-gray-400">{detailedStats.maxMonth.month}</div>
+                  <div className="mt-2 flex justify-center">
+                    <MiniDistributionChart
+                      data={detailedStats.distributions.month}
+                      currentValue={detailedStats.maxMonth.count}
+                      color="#dc2626"
+                      width={100}
+                      height={32}
+                    />
+                  </div>
+                </div>
+                
+                {/* 最高日 */}
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-indigo-600 mb-1">{detailedStats.maxDay.count}</div>
+                  <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">最高日</div>
+                  <div className="text-xs text-gray-400">{detailedStats.maxDay.date}</div>
+                  <div className="mt-2 flex justify-center">
+                    <MiniDistributionChart
+                      data={detailedStats.distributions.day}
+                      currentValue={detailedStats.maxDay.count}
+                      color="#4f46e5"
+                      width={100}
+                      height={32}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
