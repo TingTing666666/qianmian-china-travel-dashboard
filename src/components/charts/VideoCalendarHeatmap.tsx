@@ -611,12 +611,13 @@ export function VideoCalendarHeatmap({ className }: VideoCalendarHeatmapProps) {
                   <div className="text-xs text-gray-400">个/年</div>
                   <div className="mt-2 flex justify-center">
                     <MiniDistributionChart
-                      data={detailedStats.distributions.year}
-                      currentValue={detailedStats.yearAvg}
-                      color="#2563eb"
-                      width={100}
-                      height={32}
-                    />
+                    data={detailedStats.distributions.year}
+                    currentValue={detailedStats.yearAvg}
+                    color="#2563eb"
+                    width={100}
+                    height={32}
+                    title="年平均分布"
+                  />
                   </div>
                 </div>
                 
@@ -632,6 +633,7 @@ export function VideoCalendarHeatmap({ className }: VideoCalendarHeatmapProps) {
                       color="#16a34a"
                       width={100}
                       height={32}
+                      title="月平均分布"
                     />
                   </div>
                 </div>
@@ -648,6 +650,7 @@ export function VideoCalendarHeatmap({ className }: VideoCalendarHeatmapProps) {
                       color="#9333ea"
                       width={100}
                       height={32}
+                      title="日平均分布"
                     />
                   </div>
                 </div>
@@ -659,12 +662,13 @@ export function VideoCalendarHeatmap({ className }: VideoCalendarHeatmapProps) {
                   <div className="text-xs text-gray-400">{detailedStats.maxYear.year}年</div>
                   <div className="mt-2 flex justify-center">
                     <MiniDistributionChart
-                      data={detailedStats.distributions.year}
-                      currentValue={detailedStats.maxYear.count}
-                      color="#ea580c"
-                      width={100}
-                      height={32}
-                    />
+                    data={detailedStats.distributions.year}
+                    currentValue={detailedStats.maxYear.count}
+                    color="#ea580c"
+                    width={100}
+                    height={32}
+                    title="最高年分布"
+                  />
                   </div>
                 </div>
                 
@@ -680,6 +684,7 @@ export function VideoCalendarHeatmap({ className }: VideoCalendarHeatmapProps) {
                       color="#dc2626"
                       width={100}
                       height={32}
+                      title="最高月分布"
                     />
                   </div>
                 </div>
@@ -696,6 +701,7 @@ export function VideoCalendarHeatmap({ className }: VideoCalendarHeatmapProps) {
                       color="#4f46e5"
                       width={100}
                       height={32}
+                      title="最高日分布"
                     />
                   </div>
                 </div>
