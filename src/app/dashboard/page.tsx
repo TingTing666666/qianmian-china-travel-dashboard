@@ -2,9 +2,6 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card"
 import { Activity, Video, MessageCircle, TrendingUp } from "lucide-react"
-import { ProvinceChart } from "@/components/charts/ProvinceChart"
-import { ChinaMap } from "@/components/charts/ChinaMap"
-import { DebugMap } from "@/components/charts/DebugMap"
 import { useState, useEffect } from 'react';
 
 // 模拟数据
@@ -83,13 +80,6 @@ export default function DashboardPage() {
             </Card>
           )
         })}
-      </div>
-
-      {/* 省份提及统计图表 */}
-      <div className="mb-6 grid gap-4 md:grid-cols-1 lg:grid-cols-2">
-        <ProvinceChart limit={8} />
-        {/* <DebugMap /> */}
-        <ChinaMap />
       </div>
 
       {/* 主要内容区域 */}

@@ -5,7 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { useSidebar } from "./SidebarProvider"
-import { Home, Info, Video, MessageCircle, ChevronDown, ChevronRight } from "lucide-react"
+import { Home, Info, Video, MessageCircle, ChevronDown, ChevronRight, MapPin } from "lucide-react"
 import { NavItem } from "@/types/global"
 
 // 导航配置
@@ -28,6 +28,10 @@ const navigationItems: NavItem[] = [
       {
         title: "时序分析",
         href: "/videos/analysis",
+      },
+      {
+        title: "地域分析",
+        href: "/videos/regional",
       },
       {
         title: "视频数据",
