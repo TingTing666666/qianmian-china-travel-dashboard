@@ -179,5 +179,4 @@ export function RecentVideos() {
   )
 }
 
-export { RecentVideos }
 export default RecentVideos
