@@ -107,17 +107,28 @@ export function RecentVideos() {
             >
               {/* 视频缩略图 */}
               <div className="relative w-full h-26 rounded-lg overflow-hidden bg-muted flex-shrink-0">
-                <img
-                  src={getVideoThumbnail(video.id)}
-                  alt={video.title || '视频缩略图'}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement
-                    target.src = '/YouTubeLogosu.png'
-                    target.style.display = 'block'
-                    target.className = 'w-full h-full object-contain bg-gray-100'
-                  }}
-                />
+                <div className="relative w-full h-full">
+                  {/* 默认显示 YouTube Logo */}
+                  <img
+                    src="/YouTubeLogosu.png"
+                    alt="YouTube Logo"
+                    className="w-full h-full object-contain bg-gray-100"
+                  />
+                  {/* 视频缩略图，加载成功后会覆盖 Logo */}
+                  <img
+                    src={getVideoThumbnail(video.id)}
+                    alt={video.title || '视频缩略图'}
+                    className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-300"
+                    onLoad={(e) => {
+                      const target = e.target as HTMLImageElement
+                      target.style.opacity = '1'
+                    }}
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement
+                      target.style.display = 'none'
+                    }}
+                  />
+                </div>
                 <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
                   <Play className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
