@@ -1,7 +1,7 @@
 /*
  * @Date: 2025-01-16 00:00:00
  * @LastEditors: TingTing 110824020+TingTing666666@users.noreply.github.com
- * @LastEditTime: 2025-01-16 00:00:00
+ * @LastEditTime: 2025-09-18 14:16:40
  * @FilePath: \qianmian-china-travel-dashboard\src\components\dashboard\RecentVideos.tsx
  */
 "use client"
@@ -113,15 +113,9 @@ export function RecentVideos() {
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement
-                    target.style.display = 'none'
-                    target.parentElement!.innerHTML = `
-                      <div class="w-full h-full flex items-center justify-center bg-muted">
-                        <svg class="w-8 h-8 text-muted-foreground" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
-                          <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
-                        </svg>
-                      </div>
-                    `
+                    target.src = '/YouTubeLogosu.png'
+                    target.style.display = 'block'
+                    target.className = 'w-full h-full object-contain bg-gray-100'
                   }}
                 />
                 <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
