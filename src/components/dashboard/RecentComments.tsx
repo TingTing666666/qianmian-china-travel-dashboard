@@ -24,7 +24,7 @@ const RecentComments: React.FC<RecentCommentsProps> = ({ className }) => {
       try {
         setLoading(true)
         const response = await commentService.getCommentData({
-          limit: 1,
+          limit: 2,
           sortBy: 'likecount',
           sortOrder: 'desc'
         })
@@ -88,10 +88,10 @@ const RecentComments: React.FC<RecentCommentsProps> = ({ className }) => {
         actionHref="/comments/data"
       >
         <div className="flex-1 flex flex-col space-y-4">
-          {[...Array(1)].map((_, i) => (
+          {[...Array(2)].map((_, i) => (
             <div key={i} className="animate-pulse flex-1 flex flex-col space-y-3">
               <div className="flex items-start space-x-3">
-                <div className="w-10 h-10 bg-muted rounded-full"></div>
+                <div className="w-8 h-8 bg-muted rounded-full"></div>
                 <div className="flex-1 space-y-2">
                   <div className="h-4 bg-muted rounded w-1/3"></div>
                   <div className="h-3 bg-muted rounded w-1/2"></div>
@@ -134,7 +134,7 @@ const RecentComments: React.FC<RecentCommentsProps> = ({ className }) => {
             <div key={`${comment.videoid}-${index}`} className="flex-1 flex flex-col space-y-3">
               {/* 用户头像和基本信息 */}
               <div className="flex items-start space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center flex-shrink-0">
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center flex-shrink-0">
                   <User className="h-5 w-5 text-blue-600" />
                 </div>
                 <div className="flex-1 min-w-0">

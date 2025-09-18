@@ -1,14 +1,13 @@
 /*
  * @Date: 2025-01-16 00:00:00
  * @LastEditors: TingTing 110824020+TingTing666666@users.noreply.github.com
- * @LastEditTime: 2025-01-16 00:00:00
+ * @LastEditTime: 2025-09-18 11:33:45
  * @FilePath: \qianmian-china-travel-dashboard\src\components\dashboard\VideoGrowthChart.tsx
  */
 import React, { useState, useEffect, useRef } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
-import { TrendingUp, ExternalLink, Calendar } from 'lucide-react'
+import { DashboardCard } from './DashboardCard'
+import { TrendingUp, Calendar } from 'lucide-react'
 import * as echarts from 'echarts'
-import Link from 'next/link'
 
 interface VideoGrowthChartProps {
   className?: string
@@ -208,8 +207,8 @@ const VideoGrowthChart: React.FC<VideoGrowthChartProps> = ({ className }) => {
           axisLabel: {
             fontSize: 10,
             color: '#64748b',
-            interval: 'auto',
-            rotate: 0,
+            interval: 'auto', // 自动计算间隔避免重叠
+            rotate: 45, // 旋转45度避免标签挤在一起
             formatter: function(value: any) {
               const date = new Date(value)
               return date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })
@@ -229,7 +228,13 @@ const VideoGrowthChart: React.FC<VideoGrowthChartProps> = ({ className }) => {
           type: 'value',
           axisLabel: {
             fontSize: 10,
-            color: '#64748b'
+            color: '#64748b',
+            formatter: function(value: any) {
+              if (value === 0) return '0'
+              if (value === 1) return '1'
+              if (value === 100) return '100'
+              return ''
+            }
           },
           axisLine: {
             show: false
@@ -240,18 +245,10 @@ const VideoGrowthChart: React.FC<VideoGrowthChartProps> = ({ className }) => {
               type: 'dashed'
             }
           },
-          interval: 'auto',
-          splitNumber: 6,
-          min: function(value: any) {
-            return Math.max(0, Math.floor(value.min * 0.8))
-          },
-          max: function(value: any) {
-            const range = value.max - value.min
-            if (range <= 5) {
-              return Math.ceil(value.max * 1.3)
-            }
-            return Math.ceil(value.max * 1.1)
-          }
+          min: 0,
+          max: 100,
+          interval: 99,
+          splitNumber: 3
         },
         series: [
           {
@@ -363,16 +360,26 @@ const VideoGrowthChart: React.FC<VideoGrowthChartProps> = ({ className }) => {
           type: 'value',
           axisLabel: {
             fontSize: 10,
-            color: '#64748b'
+            color: '#64748b',
+            formatter: function(value: any) {
+              if (value === 0) return '0'
+              const maxValue = Math.max(...yearlyData.map(item => item.count))
+              if (value === maxValue) return maxValue.toString()
+              return ''
+            }
           },
           axisLine: {
             show: false
           },
           splitLine: {
-            lineStyle: {
-              color: '#f1f5f9',
-              type: 'dashed'
-            }
+            show: false
+          },
+          min: 0,
+          max: function(value: any) {
+            return Math.max(...yearlyData.map(item => item.count))
+          },
+          interval: function(value: any) {
+            return Math.max(...yearlyData.map(item => item.count))
           }
         },
         series: [
@@ -454,67 +461,54 @@ const VideoGrowthChart: React.FC<VideoGrowthChartProps> = ({ className }) => {
 
   if (loading) {
     return (
-      <Card className={className}>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5" />
-            视频增长趋势分析
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-80 flex items-center justify-center">
-            <div className="animate-pulse text-gray-400">
-              加载中...
-            </div>
+      <DashboardCard
+        title="近期视频数据"
+        description="2025年日度趋势和历年总览"
+        icon={TrendingUp}
+        iconColor="text-green-600"
+        actionText="查看详情"
+        actionHref="/videos/analysis"
+        className={className}
+      >
+        <div className="flex-1 flex items-center justify-center">
+          <div className="animate-pulse text-gray-400">
+            加载中...
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </DashboardCard>
     )
   }
 
   return (
-    <Card className={className}>
-      <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <TrendingUp className="h-4 w-4" />
-            视频增长趋势分析
-          </CardTitle>
-          <Link 
-            href="/videos/analysis" 
-            className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 transition-colors"
-          >
-            <span>查看详情</span>
-            <ExternalLink className="h-3 w-3" />
-          </Link>
-        </div>
-      </CardHeader>
-      <CardContent className="pt-2 space-y-4">
-        {/* 日度趋势图 - 上半部分 */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
+    <DashboardCard
+      title="近期视频数据"
+      description="2025年日度趋势和历年总览"
+      icon={TrendingUp}
+      iconColor="text-green-600"
+      actionText="查看详情"
+      actionHref="/videos/analysis"
+      className={className}
+    >
+      <div className="flex-1 flex flex-col space-y-4">
+        {/* 2025年日度趋势 */}
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-2">
             <TrendingUp className="h-4 w-4 text-blue-600" />
-            <h3 className="text-sm font-medium">2025年日度趋势</h3>
-            <span className="text-xs text-muted-foreground">
-              (共 {dailyData.length} 天数据)
-            </span>
+            <h3 className="text-sm font-medium text-gray-700">2025年日度趋势</h3>
           </div>
-          <div ref={dailyChartRef} className="h-40 w-full" />
+          <div ref={dailyChartRef} className="w-full h-40" />
         </div>
-        
-        {/* 年度总览图 - 下半部分 */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
+
+        {/* 历年总览 */}
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-2">
             <Calendar className="h-4 w-4 text-green-600" />
-            <h3 className="text-sm font-medium">历年总览</h3>
-            <span className="text-xs text-muted-foreground">
-              (共 {yearlyData.length} 年数据)
-            </span>
+            <h3 className="text-sm font-medium text-gray-700">历年总览</h3>
           </div>
-          <div ref={yearlyChartRef} className="h-40 w-full" />
+          <div ref={yearlyChartRef} className="w-full h-40" />
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </DashboardCard>
   )
 }
 

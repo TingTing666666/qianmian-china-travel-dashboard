@@ -324,8 +324,8 @@ const CommentPolarChart: React.FC<CommentPolarChartProps> = ({ className }) => {
   if (loading) {
     return (
     <DashboardCard
-      title="评论极坐标图"
-      description="情感分数分布（环形坐标为分数，堆叠显示各年份）"
+      title="近期评论数据"
+        description="情感分数分布"
       icon={Target}
       iconColor="text-blue-600"
       actionText="查看详情"
@@ -343,8 +343,8 @@ const CommentPolarChart: React.FC<CommentPolarChartProps> = ({ className }) => {
 
   return (
     <DashboardCard
-      title="评论极坐标图"
-      description="情感分数分布（环形坐标为分数，堆叠显示各年份）"
+      title="近期评论数据"
+        description="情感分数分布"
       icon={Target}
       iconColor="text-blue-600"
       actionText="查看详情"

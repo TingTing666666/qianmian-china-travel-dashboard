@@ -9,7 +9,7 @@
 import { useState, useEffect } from 'react'
 import { DashboardCard } from './DashboardCard'
 import { Badge } from '@/components/ui/Badge'
-import { Play, Eye, ThumbsUp, ExternalLink } from "lucide-react"
+import { Play, Eye, ThumbsUp } from "lucide-react"
 import { videoService } from '@/services/clientVideoService'
 import { VideoData } from '@/types/video'
 
@@ -68,7 +68,7 @@ export function RecentVideos() {
         <div className="space-y-4">
           {[...Array(3)].map((_, i) => (
             <div key={i} className="flex space-x-3 animate-pulse">
-              <div className="w-20 h-12 bg-muted rounded" />
+              <div className="w-16 h-10 bg-muted rounded" />
               <div className="flex-1 space-y-2">
                 <div className="h-4 bg-muted rounded w-3/4" />
                 <div className="h-3 bg-muted rounded w-1/2" />
@@ -98,9 +98,15 @@ export function RecentVideos() {
           </div>
         ) : (
           videos.map((video) => (
-            <div key={video.id} className="flex-1 flex flex-col space-y-3 group">
+            <a
+              key={video.id}
+              href={getVideoUrl(video.id)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 flex flex-col space-y-3 group cursor-pointer"
+            >
               {/* 视频缩略图 */}
-              <div className="relative w-full h-32 rounded-lg overflow-hidden bg-muted flex-shrink-0">
+              <div className="relative w-full h-26 rounded-lg overflow-hidden bg-muted flex-shrink-0">
                 <img
                   src={getVideoThumbnail(video.id)}
                   alt={video.title || '视频缩略图'}
@@ -159,19 +165,9 @@ export function RecentVideos() {
                       <span>{video.comment_count ? `${formatNumber(video.comment_count)} 评论` : '暂无评论'}</span>
                     </div>
                   </div>
-                  
-                  <a
-                    href={getVideoUrl(video.id)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-1 w-full h-8 px-3 text-xs font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-md transition-colors"
-                  >
-                    <ExternalLink className="h-3 w-3" />
-                    观看视频
-                  </a>
                 </div>
               </div>
-            </div>
+            </a>
           ))
         )}
       </div>
