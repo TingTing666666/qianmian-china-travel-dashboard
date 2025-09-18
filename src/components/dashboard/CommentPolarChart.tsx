@@ -31,18 +31,71 @@ const CommentPolarChart: React.FC<CommentPolarChartProps> = ({ className }) => {
       try {
         setLoading(true)
         
-        // 调用真实的评论服务获取数据
-        const response = await fetch('/api/comments/polar-data')
-        if (response.ok) {
-          const result = await response.json()
-          if (result.success) {
-            setData(result.data)
-          } else {
-            throw new Error(result.error)
+        // 使用与评论数据页面相同的数据源，读取所有数据
+        const response = await commentService.getCommentData({
+          limit: 10000, // 增加限制以获取更多数据
+          sortBy: 'publishedat',
+          sortOrder: 'desc'
+        })
+        
+        console.log('评论数据响应:', response) // 添加调试日志
+        
+        // 处理数据，按情感分数和年份进行分组统计
+        const processedData: PolarData[] = []
+        const scoreRanges = [
+          { min: -1.0, max: -0.8, label: -1.0 },
+          { min: -0.8, max: -0.6, label: -0.8 },
+          { min: -0.6, max: -0.4, label: -0.6 },
+          { min: -0.4, max: -0.2, label: -0.4 },
+          { min: -0.2, max: 0.0, label: -0.2 },
+          { min: 0.0, max: 0.2, label: 0.0 },
+          { min: 0.2, max: 0.4, label: 0.2 },
+          { min: 0.4, max: 0.6, label: 0.4 },
+          { min: 0.6, max: 0.8, label: 0.6 },
+          { min: 0.8, max: 1.0, label: 0.8 },
+          { min: 1.0, max: 1.0, label: 1.0 }
+        ]
+        
+        // 统计每个分数范围和年份的评论数量
+        const stats: { [key: string]: { [year: string]: number } } = {}
+        
+        response.data.forEach(comment => {
+          if (comment.compound && comment.publishedat) {
+            const compoundScore = parseFloat(comment.compound)
+            const publishDate = new Date(comment.publishedat)
+            const year = publishDate.getFullYear().toString()
+            
+            // 找到对应的分数范围
+            const scoreRange = scoreRanges.find(range => 
+              compoundScore >= range.min && compoundScore <= range.max
+            )
+            
+            if (scoreRange) {
+              const scoreKey = scoreRange.label.toString()
+              if (!stats[scoreKey]) {
+                stats[scoreKey] = {}
+              }
+              if (!stats[scoreKey][year]) {
+                stats[scoreKey][year] = 0
+              }
+              stats[scoreKey][year]++
+            }
           }
-        } else {
-          throw new Error('获取数据失败')
-        }
+        })
+        
+        // 转换为图表数据格式
+        Object.keys(stats).forEach(scoreKey => {
+          Object.keys(stats[scoreKey]).forEach(year => {
+            processedData.push({
+              score: parseFloat(scoreKey),
+              year: year,
+              count: stats[scoreKey][year]
+            })
+          })
+        })
+        
+        console.log('处理后的极坐标数据:', processedData) // 添加调试日志
+        setData(processedData)
       } catch (error) {
         console.error('获取评论极坐标数据失败:', error)
         // 使用适合新格式的模拟数据
@@ -211,6 +264,32 @@ const CommentPolarChart: React.FC<CommentPolarChartProps> = ({ className }) => {
           splitLine: {
             lineStyle: {
               color: '#e5e7eb'
+            }
+          },
+          // 使用不规则刻度，更好地展示数据分布
+          interval: 'auto',
+          splitNumber: 6,
+          min: 0,
+          max: function(value: any) {
+            // 动态计算最大值，并添加一些余量
+            const maxValue = Math.max(...data.map(item => item.count))
+            if (maxValue <= 50) return 50
+            if (maxValue <= 100) return 100
+            if (maxValue <= 200) return 200
+            if (maxValue <= 500) return 500
+            return Math.ceil(maxValue / 100) * 100
+          },
+          axisLine: {
+            show: true,
+            lineStyle: {
+              color: '#d1d5db'
+            }
+          },
+          axisTick: {
+            show: true,
+            length: 3,
+            lineStyle: {
+              color: '#d1d5db'
             }
           }
         },
