@@ -3,6 +3,7 @@
 import React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { useSidebar } from "./SidebarProvider"
 import { Home, Info, Video, MessageCircle, ChevronDown, ChevronRight, MapPin } from "lucide-react"
@@ -130,21 +131,35 @@ function SidebarItem({ item, isCollapsed }: SidebarItemProps) {
         </button>
         
         {isExpanded && !isCollapsed && (
-          <div className="ml-6 mt-1 space-y-1 animate-fade-in">
-            {item.children?.map((child) => (
-              <Link
-                key={child.href}
-                href={child.href}
-                className={cn(
-                  "block rounded-lg px-3 py-2 text-sm transition-colors",
-                  "hover:bg-accent hover:text-accent-foreground",
-                  pathname === child.href && "bg-accent text-accent-foreground"
-                )}
-              >
-                {child.title}
-              </Link>
-            ))}
-          </div>
+          <AnimatePresence>
+            <motion.div 
+              className="ml-6 mt-1 space-y-1"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.2, ease: "easeInOut" }}
+            >
+              {item.children?.map((child, index) => (
+                <motion.div
+                  key={child.href}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.05, duration: 0.2 }}
+                >
+                  <Link
+                    href={child.href}
+                    className={cn(
+                      "block rounded-lg px-3 py-2 text-sm transition-colors",
+                      "hover:bg-accent hover:text-accent-foreground",
+                      pathname === child.href && "bg-accent text-accent-foreground"
+                    )}
+                  >
+                    {child.title}
+                  </Link>
+                </motion.div>
+              ))}
+            </motion.div>
+          </AnimatePresence>
         )}
       </div>
     )
@@ -198,12 +213,16 @@ export function Sidebar() {
   }
 
   return (
-    <div
+    <motion.div
       className={cn(
         "flex h-full flex-col border-r bg-background transition-all duration-300 flex-shrink-0",
         isOpen ? "w-64" : "w-16"
       )}
       style={{ minWidth: isOpen ? '256px' : '64px', maxWidth: isOpen ? '256px' : '64px' }}
+      animate={{ 
+        width: isOpen ? 256 : 64,
+      }}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
     >
       {/* Logo 区域 */}
       <div className="flex h-16 items-center border-b px-4">
@@ -224,8 +243,15 @@ export function Sidebar() {
 
       {/* 导航菜单 */}
       <nav className="flex-1 space-y-1 p-4">
-        {navigationItems.map((item) => (
-          <SidebarItem key={item.href} item={item} isCollapsed={!isOpen} />
+        {navigationItems.map((item, index) => (
+          <motion.div
+            key={item.href}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1, duration: 0.3 }}
+          >
+            <SidebarItem item={item} isCollapsed={!isOpen} />
+          </motion.div>
         ))}
       </nav>
 
@@ -244,6 +270,6 @@ export function Sidebar() {
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }
