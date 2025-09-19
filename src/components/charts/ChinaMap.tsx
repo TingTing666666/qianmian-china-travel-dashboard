@@ -211,8 +211,11 @@ export function ChinaMap({ data = [] }: ChinaMapProps) {
   // 手动刷新
   const handleRefresh = async () => {
     setRefreshing(true)
-    await initMap()
-    setTimeout(() => setRefreshing(false), 500)
+    try {
+      await initMap()
+    } finally {
+      setTimeout(() => setRefreshing(false), 300)
+    }
   }
 
   useEffect(() => {

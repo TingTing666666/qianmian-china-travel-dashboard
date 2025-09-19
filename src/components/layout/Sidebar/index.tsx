@@ -65,9 +65,15 @@ interface SidebarItemProps {
 function SidebarItem({ item, isCollapsed }: SidebarItemProps) {
   const pathname = usePathname()
   const [isExpanded, setIsExpanded] = React.useState(false)
+  const [isClient, setIsClient] = React.useState(false)
   const { setOpen } = useSidebar()
   const hasChildren = item.children && item.children.length > 0
   const isActive = pathname === item.href || (hasChildren && item.children?.some(child => pathname === child.href))
+
+  // 确保只在客户端执行
+  React.useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   // 如果当前路径是子项目之一，自动展开
   React.useEffect(() => {
@@ -93,13 +99,15 @@ function SidebarItem({ item, isCollapsed }: SidebarItemProps) {
   if (hasChildren) {
     return (
       <div>
-        <button
+        <motion.button
           onClick={handleCollapsedClick}
           className={cn(
             "flex w-full items-center rounded-lg px-3 py-2 text-sm transition-all duration-200",
             "hover:bg-accent hover:text-accent-foreground",
             isActive && "bg-accent text-accent-foreground"
           )}
+          whileTap={{ scale: 0.95 }}
+          transition={{ type: "spring", stiffness: 400, damping: 17 }}
         >
           {isCollapsed ? (
             // 收起状态：只显示居中的图标
@@ -128,7 +136,7 @@ function SidebarItem({ item, isCollapsed }: SidebarItemProps) {
               </div>
             </>
           )}
-        </button>
+        </motion.button>
         
         {isExpanded && !isCollapsed && (
           <AnimatePresence>
@@ -141,11 +149,12 @@ function SidebarItem({ item, isCollapsed }: SidebarItemProps) {
             >
               {item.children?.map((child, index) => (
                 <motion.div
-                  key={child.href}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.05, duration: 0.2 }}
-                >
+                    key={child.href}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05, duration: 0.2 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
                   <Link
                     href={child.href}
                     className={cn(
@@ -166,42 +175,78 @@ function SidebarItem({ item, isCollapsed }: SidebarItemProps) {
   }
 
   return (
-    <Link
-      href={item.href}
-      className={cn(
-        "flex items-center rounded-lg px-3 py-2 text-sm transition-all duration-200",
-        "hover:bg-accent hover:text-accent-foreground",
-        isActive && "bg-accent text-accent-foreground"
-      )}
+    <motion.div
+      whileTap={{ scale: 0.95 }}
+      transition={{ type: "spring", stiffness: 400, damping: 17 }}
     >
-      {isCollapsed ? (
-        // 收起状态：只显示居中的图标
-        <div className="flex w-full justify-center">
-          {Icon && <Icon className="h-4 w-4 flex-shrink-0" />}
-        </div>
-      ) : (
-        // 展开状态：显示完整布局
-        <>
-          {Icon && <Icon className="h-4 w-4 flex-shrink-0" />}
-          <span 
-            className={cn(
-              "transition-all duration-200 overflow-hidden whitespace-nowrap ml-3 opacity-100"
-            )}
-          >
-            {item.title}
-          </span>
-          {item.badge && (
-            <span 
-              className={cn(
-                "ml-auto rounded-full bg-primary px-2 py-1 text-xs text-primary-foreground transition-all duration-200 opacity-100 max-w-none"
-              )}
-            >
-              {item.badge}
-            </span>
+      {isClient ? (
+        <Link
+          href={item.href}
+          className={cn(
+            "flex items-center rounded-lg px-3 py-2 text-sm transition-all duration-200",
+            "hover:bg-accent hover:text-accent-foreground",
+            isActive && "bg-accent text-accent-foreground"
           )}
-        </>
+        >
+          {isCollapsed ? (
+            // 收起状态：只显示居中的图标
+            <div className="flex w-full justify-center">
+              {Icon && <Icon className="h-4 w-4 flex-shrink-0" />}
+            </div>
+          ) : (
+            // 展开状态：显示完整布局
+            <>
+              {Icon && <Icon className="h-4 w-4 flex-shrink-0" />}
+              <span 
+                className={cn(
+                  "transition-all duration-200 overflow-hidden whitespace-nowrap ml-3 opacity-100"
+                )}
+              >
+                {item.title}
+              </span>
+              {item.badge && (
+                <span className="ml-auto rounded-full bg-primary px-2 py-1 text-xs text-primary-foreground">
+                  {item.badge}
+                </span>
+              )}
+            </>
+          )}
+        </Link>
+      ) : (
+        // 服务端渲染时的占位符，避免水合错误
+        <div
+          className={cn(
+            "flex items-center rounded-lg px-3 py-2 text-sm transition-all duration-200",
+            "hover:bg-accent hover:text-accent-foreground",
+            isActive && "bg-accent text-accent-foreground"
+          )}
+        >
+          {isCollapsed ? (
+            // 收起状态：只显示居中的图标
+            <div className="flex w-full justify-center">
+              {Icon && <Icon className="h-4 w-4 flex-shrink-0" />}
+            </div>
+          ) : (
+            // 展开状态：显示完整布局
+            <>
+              {Icon && <Icon className="h-4 w-4 flex-shrink-0" />}
+              <span 
+                className={cn(
+                  "transition-all duration-200 overflow-hidden whitespace-nowrap ml-3 opacity-100"
+                )}
+              >
+                {item.title}
+              </span>
+              {item.badge && (
+                <span className="ml-auto rounded-full bg-primary px-2 py-1 text-xs text-primary-foreground">
+                  {item.badge}
+                </span>
+              )}
+            </>
+          )}
+        </div>
       )}
-    </Link>
+    </motion.div>
   )
 }
 

@@ -8,13 +8,11 @@ export default function RegionalAnalysisPage() {
   return (
     <div className="flex-1 space-y-6 p-8 pt-6">
       {/* 页面头部 */}
-      <div className="flex items-center justify-between space-y-2">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">地域分析</h2>
-          <p className="text-muted-foreground">
-            基于视频内容的中国省份地域分布分析
-          </p>
-        </div>
+      <div className="space-y-2">
+        <h2 className="text-3xl font-bold tracking-tight text-blue-600">地域分析</h2>
+        <p className="text-muted-foreground">
+          基于视频内容的中国省份地域分布分析
+        </p>
       </div>
 
       {/* 地域分析图表 */}

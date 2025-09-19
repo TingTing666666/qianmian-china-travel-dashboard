@@ -29,31 +29,47 @@ export function SidebarProvider({ children, defaultOpen = true }: SidebarProvide
   const [isMobile, setIsMobile] = useState(false)
   const [isInitialized, setIsInitialized] = useState(false)
 
-  // 检测移动端设备
+  // 检测移动端设备 - 只在客户端执行
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768)
     }
     
+    // 初始检测
     checkMobile()
     window.addEventListener("resize", checkMobile)
     
     return () => window.removeEventListener("resize", checkMobile)
   }, [])
 
-  // 从 localStorage 恢复侧边栏状态（只在初始化时执行一次）
+  // 从 localStorage 恢复侧边栏状态（只在客户端初始化时执行一次）
   useEffect(() => {
-    const stored = localStorage.getItem("sidebar-open")
-    if (stored !== null) {
-      setIsOpen(JSON.parse(stored))
+    // 确保只在客户端执行
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem("sidebar-open")
+      if (stored !== null) {
+        try {
+          const parsedValue = JSON.parse(stored)
+          setIsOpen(parsedValue)
+        } catch (error) {
+          // 如果解析失败，使用默认值
+          console.warn('Failed to parse sidebar state from localStorage:', error)
+          setIsOpen(defaultOpen)
+        }
+      }
     }
     setIsInitialized(true)
-  }, [])
+  }, [defaultOpen])
 
-  // 保存侧边栏状态到 localStorage（只在初始化完成后执行）
+  // 保存侧边栏状态到 localStorage（只在初始化完成后且在客户端执行）
   useEffect(() => {
-    if (isInitialized) {
-      localStorage.setItem("sidebar-open", JSON.stringify(isOpen))
+    if (isInitialized && typeof window !== 'undefined') {
+      try {
+        localStorage.setItem("sidebar-open", JSON.stringify(isOpen))
+      } catch (error) {
+        // 处理 localStorage 不可用的情况
+        console.warn('Failed to save sidebar state to localStorage:', error)
+      }
     }
   }, [isOpen, isInitialized])
 
