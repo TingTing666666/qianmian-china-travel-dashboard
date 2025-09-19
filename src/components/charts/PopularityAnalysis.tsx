@@ -23,16 +23,16 @@ interface TabItem {
 
 const tabs: TabItem[] = [
   {
-    id: 'factors',
-    label: '热度因素统计',
-    icon: TrendingUp,
-    component: PopularityFactorChart
-  },
-  {
     id: '3d-analysis',
     label: '三维热度分析',
     icon: Box,
     component: ThreeDimensionalChart
+  },
+  {
+    id: 'factors',
+    label: '热度因素统计',
+    icon: TrendingUp,
+    component: PopularityFactorChart
   }
 ]
 
@@ -41,9 +41,9 @@ interface PopularityAnalysisProps {
 }
 
 export function PopularityAnalysis({ className }: PopularityAnalysisProps) {
-  const [activeTab, setActiveTab] = useState('factors')
+  const [activeTab, setActiveTab] = useState('3d-analysis')
 
-  const ActiveComponent = tabs.find(tab => tab.id === activeTab)?.component || PopularityFactorChart
+  const ActiveComponent = tabs.find(tab => tab.id === activeTab)?.component || ThreeDimensionalChart
 
   return (
     <div className={cn("w-full", className)}>

@@ -21,6 +21,7 @@ export interface VideoData {
   comment_count: number | null
   duration: string | null
   created_at: string | null
+  updated_at: string | null
 }
 
 // 视频数据查询参数
@@ -59,5 +60,6 @@ export const VIDEO_FIELD_LABELS: Record<keyof VideoData, string> = {
   favorite_count: '收藏数',
   comment_count: '评论数',
   duration: '时长',
-  created_at: '创建时间'
+  created_at: '创建时间',
+  updated_at: '更新时间'
 }

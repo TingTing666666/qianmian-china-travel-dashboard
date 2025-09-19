@@ -5,13 +5,15 @@ import * as echarts from 'echarts'
 // 动态导入echarts-gl以避免构建时错误
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
-import { RefreshCw, Settings, RotateCcw, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react'
+import { CustomSelect } from '@/components/ui/CustomSelect'
+import { RefreshCw, RotateCcw, Box, Filter, Zap, BarChart3 } from 'lucide-react'
 import { videoService } from '@/services/clientVideoService'
 import { VideoData } from '@/types/video'
 import { cn } from '@/lib/utils'
 
 type ScaleMode = 'linear' | 'log' | 'sqrt'
 type FilterMode = 'all' | 'removeOutliers' | 'topPercentile'
+type ChartType = '3d' | '2d'
 
 interface ThreeDimensionalChartProps {
   className?: string
@@ -25,10 +27,9 @@ export function ThreeDimensionalChart({ className }: ThreeDimensionalChartProps)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [scaleMode, setScaleMode] = useState<ScaleMode>('log')
-  const [filterMode, setFilterMode] = useState<FilterMode>('removeOutliers')
-  const [showControls, setShowControls] = useState(false)
-  const [zoomMode, setZoomMode] = useState<'select' | 'dataZoom'>('select')
-  const [autoRotate, setAutoRotate] = useState(false)
+  const [filterMode, setFilterMode] = useState<FilterMode>('all')
+  const [chartType, setChartType] = useState<ChartType>('3d')
+  const [autoRotate, setAutoRotate] = useState(true)
 
   // 获取数据
   const fetchData = async () => {
@@ -58,20 +59,20 @@ export function ThreeDimensionalChart({ className }: ThreeDimensionalChartProps)
 
     // 过滤掉所有数值都为0的数据
     const validData = data.filter(item => 
-      item.viewCount > 0 || item.likeCount > 0 || item.commentCount > 0
+      (item.view_count || 0) > 0 || (item.like_count || 0) > 0 || (item.comment_count || 0) > 0
     )
 
     if (mode === 'topPercentile') {
       // 返回前20%的数据（按观看次数排序）
-      const sortedData = [...validData].sort((a, b) => b.viewCount - a.viewCount)
+      const sortedData = [...validData].sort((a, b) => (b.view_count || 0) - (a.view_count || 0))
       return sortedData.slice(0, Math.ceil(sortedData.length * 0.2))
     }
 
     if (mode === 'removeOutliers') {
       // 使用IQR方法移除异常值
-      const viewCounts = validData.map(item => item.viewCount).sort((a, b) => a - b)
-      const likeCounts = validData.map(item => item.likeCount).sort((a, b) => a - b)
-      const commentCounts = validData.map(item => item.commentCount).sort((a, b) => a - b)
+      const viewCounts = validData.map(item => item.view_count || 0).sort((a, b) => a - b)
+      const likeCounts = validData.map(item => item.like_count || 0).sort((a, b) => a - b)
+      const commentCounts = validData.map(item => item.comment_count || 0).sort((a, b) => a - b)
 
       const getIQRBounds = (values: number[]) => {
         const q1 = values[Math.floor(values.length * 0.25)]
@@ -85,9 +86,9 @@ export function ThreeDimensionalChart({ className }: ThreeDimensionalChartProps)
       const commentBounds = getIQRBounds(commentCounts)
 
       return validData.filter(item =>
-        item.viewCount >= viewBounds.lower && item.viewCount <= viewBounds.upper &&
-        item.likeCount >= likeBounds.lower && item.likeCount <= likeBounds.upper &&
-        item.commentCount >= commentBounds.lower && item.commentCount <= commentBounds.upper
+        (item.view_count || 0) >= viewBounds.lower && (item.view_count || 0) <= viewBounds.upper &&
+        (item.like_count || 0) >= likeBounds.lower && (item.like_count || 0) <= likeBounds.upper &&
+        (item.comment_count || 0) >= commentBounds.lower && (item.comment_count || 0) <= commentBounds.upper
       )
     }
 
@@ -165,9 +166,9 @@ export function ThreeDimensionalChart({ className }: ThreeDimensionalChartProps)
     if (supports3D) {
       // 3D散点图配置
       const chartData = filteredData.map((item, index) => {
-        const x = transformValue(item.likeCount, scaleMode)
-        const y = transformValue(item.commentCount, scaleMode)
-        const z = transformValue(item.viewCount, scaleMode)
+        const x = transformValue(item.like_count || 0, scaleMode)
+        const y = transformValue(item.comment_count || 0, scaleMode)
+        const z = transformValue(item.view_count || 0, scaleMode)
         
         return {
           value: [x, y, z],
@@ -175,7 +176,7 @@ export function ThreeDimensionalChart({ className }: ThreeDimensionalChartProps)
           itemStyle: {
             color: `hsl(${(index * 137.5) % 360}, 70%, 60%)`
           },
-          symbolSize: Math.max(8, Math.min(25, Math.sqrt(item.viewCount) / 200))
+          symbolSize: Math.max(8, Math.min(25, Math.sqrt(item.view_count || 0) / 200))
         }
       })
 
@@ -202,11 +203,11 @@ export function ThreeDimensionalChart({ className }: ThreeDimensionalChartProps)
             
             return `
               <div style="max-width: 300px;">
-                <strong>${item.title.length > 50 ? item.title.substring(0, 50) + '...' : item.title}</strong><br/>
-                播放量: ${formatValue(item.viewCount)}<br/>
-                点赞数: ${formatValue(item.likeCount)}<br/>
-                评论数: ${formatValue(item.commentCount)}<br/>
-                频道: ${item.channelTitle}
+                <strong>${item.title && item.title.length > 50 ? item.title.substring(0, 50) + '...' : item.title || '未知标题'}</strong><br/>
+                播放量: ${formatValue(item.view_count || 0)}<br/>
+                点赞数: ${formatValue(item.like_count || 0)}<br/>
+                评论数: ${formatValue(item.comment_count || 0)}<br/>
+                频道: ${item.channel_title || '未知频道'}
               </div>
             `
           }
@@ -268,7 +269,7 @@ export function ThreeDimensionalChart({ className }: ThreeDimensionalChartProps)
           data: chartData,
           symbolSize: (data: any, params: any) => {
             const item = filteredData[params.dataIndex]
-            return Math.max(8, Math.min(25, Math.sqrt(item.viewCount) / 200))
+            return Math.max(8, Math.min(25, Math.sqrt(item.view_count || 0) / 200))
           },
           itemStyle: {
             opacity: 0.8
@@ -290,15 +291,15 @@ export function ThreeDimensionalChart({ className }: ThreeDimensionalChartProps)
       // 降级到2D散点图
       const chartData = filteredData.map((item, index) => ({
         value: [
-          transformValue(item.likeCount, scaleMode),
-          transformValue(item.commentCount, scaleMode),
-          transformValue(item.viewCount, scaleMode)
+          transformValue(item.like_count || 0, scaleMode),
+          transformValue(item.comment_count || 0, scaleMode),
+          transformValue(item.view_count || 0, scaleMode)
         ],
         name: item.title,
         itemStyle: {
           color: `hsl(${(index * 137.5) % 360}, 70%, 50%)`
         },
-        symbolSize: Math.max(8, Math.min(25, Math.sqrt(item.viewCount) / 200))
+        symbolSize: Math.max(8, Math.min(25, Math.sqrt(item.view_count || 0) / 200))
       }))
 
       const option: echarts.EChartsOption = {
@@ -324,11 +325,11 @@ export function ThreeDimensionalChart({ className }: ThreeDimensionalChartProps)
             
             return `
               <div style="max-width: 300px;">
-                <strong>${item.title.length > 50 ? item.title.substring(0, 50) + '...' : item.title}</strong><br/>
-                播放量: ${formatValue(item.viewCount)}<br/>
-                点赞数: ${formatValue(item.likeCount)}<br/>
-                评论数: ${formatValue(item.commentCount)}<br/>
-                频道: ${item.channelTitle}
+                <strong>${item.title && item.title.length > 50 ? item.title.substring(0, 50) + '...' : item.title || '未知标题'}</strong><br/>
+                播放量: ${formatValue(item.view_count || 0)}<br/>
+                点赞数: ${formatValue(item.like_count || 0)}<br/>
+                评论数: ${formatValue(item.comment_count || 0)}<br/>
+                频道: ${item.channel_title || '未知频道'}
               </div>
             `
           }
@@ -410,6 +411,33 @@ export function ThreeDimensionalChart({ className }: ThreeDimensionalChartProps)
     }
   }
 
+  // 重置所有设置到默认值
+  const resetSettings = () => {
+    setScaleMode('log')
+    setFilterMode('all')
+    setChartType('3d')
+    setAutoRotate(true)
+    
+    // 重置图表视角
+    if (chartInstance.current) {
+      const option = chartInstance.current.getOption() as any
+      if (option.grid3D && option.grid3D.length > 0) {
+        chartInstance.current.dispatchAction({
+          type: 'grid3DResetView'
+        })
+        
+        // 开启自动旋转
+        chartInstance.current.setOption({
+          grid3D: {
+            viewControl: {
+              autoRotate: true
+            }
+          }
+        })
+      }
+    }
+  }
+
   // 自动旋转切换
   const toggleAutoRotate = () => {
     if (chartInstance.current) {
@@ -460,7 +488,7 @@ export function ThreeDimensionalChart({ className }: ThreeDimensionalChartProps)
         chartInstance.current = null
       }
     }
-  }, [filteredData, scaleMode])
+  }, [filteredData, scaleMode, chartType, autoRotate])
 
   // 组件挂载时获取数据
   useEffect(() => {
@@ -495,125 +523,145 @@ export function ThreeDimensionalChart({ className }: ThreeDimensionalChartProps)
   }
 
   return (
-    <Card className={cn("w-full", className)}>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-xl font-bold">三维热度分析</CardTitle>
-          <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={resetView}
-              title="重置视角"
-            >
-              <RotateCcw className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={toggleAutoRotate}
-              title="自动旋转"
-            >
-              <Maximize2 className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowControls(!showControls)}
-            >
-              <Settings className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={fetchData}
-            >
-              <RefreshCw className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
+    <div className={className}>
+      {/* 主图表卡片 */}
+      <Card className="shadow-sm border border-gray-200 overflow-hidden">
+        <CardHeader className="bg-white border-b border-gray-200">
+          <CardTitle className="flex items-center justify-between text-gray-900">
+            <div className="flex items-center">
+              <div className="p-2 bg-blue-50 rounded-lg mr-3">
+                <Box className="w-5 h-5 text-blue-600" />
+              </div>
+              <span className="text-xl font-semibold">三维热度分析</span>
+            </div>
+            <div className="flex items-center space-x-3">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={fetchData}
+                disabled={loading}
+                className="border-gray-300 text-gray-700 hover:bg-gray-50"
+              >
+                <RefreshCw className={cn("w-4 h-4", loading && "animate-spin")} />
+              </Button>
+            </div>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          {/* 控制面板 */}
+          <div className="mb-8 flex flex-col gap-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col sm:flex-row gap-4">
+                {/* 数据过滤模式 */}
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-blue-50 rounded-lg">
+                    <Filter className="w-4 h-4 text-blue-600" />
+                  </div>
+                  <span className="text-sm font-medium text-gray-700">数据过滤：</span>
+                  <CustomSelect
+                    value={filterMode}
+                    onValueChange={(value) => setFilterMode(value as FilterMode)}
+                    options={[
+                      { value: 'all', label: '全部数据' },
+                      { value: 'topPercentile', label: '前20%数据' },
+                      { value: 'removeOutliers', label: '移除异常值' }
+                    ]}
+                    className="w-32"
+                  />
+                </div>
 
-        {/* 控制面板 */}
-        {showControls && (
-          <div className="mt-4 p-4 bg-gray-50 rounded-lg space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* 缩放模式 */}
-              <div>
-                <label className="block text-sm font-medium mb-2">数据缩放模式</label>
-                <div className="flex space-x-2">
-                  {[
-                    { value: 'linear', label: '线性' },
-                    { value: 'log', label: '对数' },
-                    { value: 'sqrt', label: '平方根' }
-                  ].map(option => (
-                    <Button
-                      key={option.value}
-                      variant={scaleMode === option.value ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setScaleMode(option.value as ScaleMode)}
-                    >
-                      {option.label}
-                    </Button>
-                  ))}
+                {/* 数据缩放模式 */}
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-purple-50 rounded-lg">
+                    <Zap className="w-4 h-4 text-purple-600" />
+                  </div>
+                  <span className="text-sm font-medium text-gray-700">缩放模式：</span>
+                  <CustomSelect
+                    value={scaleMode}
+                    onValueChange={(value) => setScaleMode(value as ScaleMode)}
+                    options={[
+                      { value: 'linear', label: '线性' },
+                      { value: 'log', label: '对数' },
+                      { value: 'sqrt', label: '平方根' }
+                    ]}
+                    className="w-32"
+                  />
                 </div>
               </div>
 
-              {/* 过滤模式 */}
-              <div>
-                <label className="block text-sm font-medium mb-2">数据过滤模式</label>
-                <div className="flex space-x-2">
-                  {[
-                    { value: 'all', label: '全部' },
-                    { value: 'removeOutliers', label: '移除异常值' },
-                    { value: 'topPercentile', label: '前20%' }
-                  ].map(option => (
-                    <Button
-                      key={option.value}
-                      variant={filterMode === option.value ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setFilterMode(option.value as FilterMode)}
-                    >
-                      {option.label}
-                    </Button>
-                  ))}
+              <div className="flex flex-col sm:flex-row gap-4">
+                {/* 图表类型 */}
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-green-50 rounded-lg">
+                    <BarChart3 className="w-4 h-4 text-green-600" />
+                  </div>
+                  <span className="text-sm font-medium text-gray-700">图表类型：</span>
+                  <CustomSelect
+                    value={chartType}
+                    onValueChange={(value) => setChartType(value as ChartType)}
+                    options={[
+                      { value: '3d', label: '3D散点图' },
+                      { value: '2d', label: '2D气泡图' }
+                    ]}
+                    className="w-32"
+                  />
+                </div>
+
+                {/* 自动旋转控制 */}
+                 <Button
+                   variant={autoRotate ? "secondary" : "outline"}
+                   size="sm"
+                   onClick={toggleAutoRotate}
+                   className={autoRotate ? "bg-blue-600 text-white hover:bg-blue-700" : "border-gray-300 text-gray-700 hover:bg-gray-50"}
+                 >
+                   <RotateCcw className="w-4 h-4 mr-1" />
+                   {autoRotate ? '停止旋转' : '自动旋转'}
+                 </Button>
+
+                 {/* 重置设置按钮 */}
+                 <Button
+                   variant="outline"
+                   size="sm"
+                   onClick={resetSettings}
+                   className="border-red-300 text-red-700 hover:bg-red-50"
+                 >
+                   重置设置
+                 </Button>
+               </div>
+            </div>
+
+            {/* 图表控制说明 */}
+            <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-gray-200">
+              <span className="text-sm font-medium text-gray-700 mr-2">图表说明：</span>
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                  <span className="text-sm text-gray-600">观看次数 (X轴)</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                  <span className="text-sm text-gray-600">点赞数 (Y轴)</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                  <span className="text-sm text-gray-600">评论数 (Z轴)</span>
                 </div>
               </div>
             </div>
-
-            {/* 数据统计 */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-              <div className="text-center">
-                <div className="font-semibold text-blue-600">{data.length}</div>
-                <div className="text-gray-500">总数据</div>
-              </div>
-              <div className="text-center">
-                <div className="font-semibold text-green-600">{filteredData.length}</div>
-                <div className="text-gray-500">显示数据</div>
-              </div>
-              <div className="text-center">
-                <div className="font-semibold text-purple-600">{scaleMode}</div>
-                <div className="text-gray-500">缩放模式</div>
-              </div>
-              <div className="text-center">
-                <div className="font-semibold text-orange-600">{filterMode}</div>
-                <div className="text-gray-500">过滤模式</div>
-              </div>
-            </div>
           </div>
-        )}
-      </CardHeader>
-      
-      <CardContent>
-        <div 
-          ref={chartRef} 
-          className="w-full h-96 md:h-[500px] lg:h-[600px]"
-        />
-        
-        {/* 操作提示 */}
-        <div className="mt-4 text-xs text-gray-500 text-center">
-          <p>鼠标拖拽旋转 • 滚轮缩放 • 右键平移 • 悬停查看详情</p>
-        </div>
-      </CardContent>
-    </Card>
+
+          {/* 图表容器 */}
+          <div 
+            ref={chartRef} 
+            className="w-full h-96 md:h-[500px] lg:h-[600px] bg-white rounded-lg border border-gray-200"
+          />
+          
+          {/* 操作提示 */}
+          <div className="mt-4 text-xs text-gray-500 text-center">
+            <p>鼠标拖拽旋转 • 滚轮缩放 • 右键平移 • 悬停查看详情</p>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   )
 }

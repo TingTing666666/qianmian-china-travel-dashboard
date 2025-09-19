@@ -114,7 +114,7 @@ export class ClientVideoService {
         title: `${month} 中国旅游精选`,
         description: `${month} 月份的中国旅游景点推荐视频`,
         channel_title: '中国旅游频道',
-        published_at: new Date(`${month}-15`),
+        published_at: `${month}-15`,
         view_count: Math.floor(Math.random() * 100000) + 50000,
         like_count: Math.floor(Math.random() * 5000) + 1000,
         comment_count: Math.floor(Math.random() * 500) + 100,
@@ -122,8 +122,8 @@ export class ClientVideoService {
         category_id: 19,
         tags: ['旅游', '中国', '景点'],
         thumbnail_url: 'https://example.com/thumbnail.jpg',
-        created_at: new Date(`${month}-15`),
-        updated_at: new Date(`${month}-15`)
+        created_at: `${month}-15`,
+        updated_at: `${month}-15`
       })
     })
     
