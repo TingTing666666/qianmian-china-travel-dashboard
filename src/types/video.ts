@@ -1,7 +1,7 @@
 /*
  * @Date: 2025-01-16 00:00:00
  * @LastEditors: TingTing 110824020+TingTing666666@users.noreply.github.com
- * @LastEditTime: 2025-01-16 00:00:00
+ * @LastEditTime: 2025-09-19 14:30:25
  * @FilePath: \qianmian-china-travel-dashboard\src\types\video.ts
  */
 

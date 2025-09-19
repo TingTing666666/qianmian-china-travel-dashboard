@@ -48,43 +48,27 @@ export function PopularityAnalysis({ className }: PopularityAnalysisProps) {
   return (
     <div className={cn("w-full", className)}>
       {/* 书签式导航栏 */}
-      <div className="relative mb-6">
-        <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+      <div className="mb-6 border-b border-gray-200">
+        <nav className="-mb-px flex space-x-8">
           {tabs.map((tab) => {
-            const Icon = tab.icon
             const isActive = activeTab === tab.id
-            
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
-                  "relative flex items-center px-4 py-3 text-sm font-medium rounded-md transition-all duration-200",
-                  "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
+                  "flex items-center py-2 px-1 border-b-2 font-medium text-sm transition-colors",
                   isActive
-                    ? "bg-white text-blue-600 shadow-sm border border-gray-200"
-                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                    ? "border-purple-500 text-purple-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                 )}
               >
-                <Icon className={cn(
-                  "w-4 h-4 mr-2 transition-colors duration-200",
-                  isActive ? "text-blue-600" : "text-gray-500"
-                )} />
-                <span className="whitespace-nowrap">{tab.label}</span>
-                
-                {/* 书签式底部装饰 */}
-                {isActive && (
-                  <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2">
-                    <div className="w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-white"></div>
-                  </div>
-                )}
+                <tab.icon className="mr-2 h-4 w-4" />
+                {tab.label}
               </button>
             )
           })}
-        </div>
-        
-        {/* 底部分割线 */}
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-gray-200"></div>
+        </nav>
       </div>
 
       {/* 内容区域 */}

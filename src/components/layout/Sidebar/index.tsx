@@ -100,9 +100,9 @@ function SidebarItem({ item, isCollapsed }: SidebarItemProps) {
         <motion.button
           onClick={handleCollapsedClick}
           className={cn(
-            "flex w-full items-center rounded-lg px-3 py-2 text-sm transition-all duration-200",
+            "relative flex w-full items-center rounded-lg px-3 py-2 text-sm transition-all duration-200",
             "hover:bg-accent hover:text-accent-foreground",
-            isActive && "bg-accent text-accent-foreground"
+            isActive && "bg-primary/10 text-primary font-medium shadow-sm"
           )}
           whileTap={{ scale: 0.95 }}
           transition={{ type: "spring", stiffness: 400, damping: 17 }}
@@ -156,9 +156,9 @@ function SidebarItem({ item, isCollapsed }: SidebarItemProps) {
                   <Link
                     href={child.href}
                     className={cn(
-                      "block rounded-lg px-3 py-2 text-sm transition-colors",
+                      "relative block rounded-lg px-3 py-2 text-sm transition-colors",
                       "hover:bg-accent hover:text-accent-foreground",
-                      pathname === child.href && "bg-accent text-accent-foreground"
+                      pathname === child.href && "bg-primary/10 text-primary font-medium shadow-sm"
                     )}
                   >
                     {child.title}
@@ -180,9 +180,9 @@ function SidebarItem({ item, isCollapsed }: SidebarItemProps) {
       <Link
         href={item.href}
         className={cn(
-          "flex items-center rounded-lg px-3 py-2 text-sm transition-all duration-200",
+          "relative flex items-center rounded-lg px-3 py-2 text-sm transition-all duration-200",
           "hover:bg-accent hover:text-accent-foreground",
-          isActive && "bg-accent text-accent-foreground"
+          isActive && "bg-primary/10 text-primary font-medium shadow-sm"
         )}
       >
       {isCollapsed ? (
