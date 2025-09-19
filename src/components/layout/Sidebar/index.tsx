@@ -64,6 +64,7 @@ interface SidebarItemProps {
 function SidebarItem({ item, isCollapsed }: SidebarItemProps) {
   const pathname = usePathname()
   const [isExpanded, setIsExpanded] = React.useState(false)
+  const { setOpen } = useSidebar()
   const hasChildren = item.children && item.children.length > 0
   const isActive = pathname === item.href || (hasChildren && item.children?.some(child => pathname === child.href))
 
@@ -76,34 +77,64 @@ function SidebarItem({ item, isCollapsed }: SidebarItemProps) {
 
   const Icon = item.icon
 
+  // 处理收起状态下有子菜单项的点击
+  const handleCollapsedClick = () => {
+    if (isCollapsed && hasChildren) {
+      // 自动打开侧边栏
+      setOpen(true)
+      // 根据不同的菜单项跳转到对应的默认页面
+      if (item.title === "视频看板") {
+        window.location.href = "/videos/analysis" // 跳转到时序分析
+      } else if (item.title === "评论看板") {
+        window.location.href = "/comments/analysis" // 跳转到评论分析
+      }
+    } else {
+      setIsExpanded(!isExpanded)
+    }
+  }
+
   if (hasChildren) {
     return (
       <div>
         <button
-          onClick={() => setIsExpanded(!isExpanded)}
+          onClick={handleCollapsedClick}
           className={cn(
-            "flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors",
+            "flex w-full items-center rounded-lg px-3 py-2 text-sm transition-all duration-200",
             "hover:bg-accent hover:text-accent-foreground",
             isActive && "bg-accent text-accent-foreground"
           )}
         >
-          <div className="flex items-center">
-            {Icon && <Icon className="mr-3 h-4 w-4" />}
-            {!isCollapsed && <span>{item.title}</span>}
-          </div>
-          {!isCollapsed && (
-            <div className="ml-auto">
-              {isExpanded ? (
-                <ChevronDown className="h-4 w-4" />
-              ) : (
-                <ChevronRight className="h-4 w-4" />
-              )}
+          {isCollapsed ? (
+            // 收起状态：只显示居中的图标
+            <div className="flex w-full justify-center">
+              {Icon && <Icon className="h-4 w-4 flex-shrink-0" />}
             </div>
+          ) : (
+            // 展开状态：显示完整布局
+            <>
+              <div className="flex items-center min-w-0">
+                {Icon && <Icon className="h-4 w-4 flex-shrink-0" />}
+                <span 
+                  className={cn(
+                    "transition-all duration-200 overflow-hidden whitespace-nowrap ml-3 opacity-100"
+                  )}
+                >
+                  {item.title}
+                </span>
+              </div>
+              <div className="transition-all duration-200">
+                {isExpanded ? (
+                  <ChevronDown className="h-4 w-4" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                )}
+              </div>
+            </>
           )}
         </button>
         
         {isExpanded && !isCollapsed && (
-          <div className="ml-6 mt-1 space-y-1">
+          <div className="ml-6 mt-1 space-y-1 animate-fade-in">
             {item.children?.map((child) => (
               <Link
                 key={child.href}
@@ -127,17 +158,37 @@ function SidebarItem({ item, isCollapsed }: SidebarItemProps) {
     <Link
       href={item.href}
       className={cn(
-        "flex items-center rounded-lg px-3 py-2 text-sm transition-colors",
+        "flex items-center rounded-lg px-3 py-2 text-sm transition-all duration-200",
         "hover:bg-accent hover:text-accent-foreground",
         isActive && "bg-accent text-accent-foreground"
       )}
     >
-      {Icon && <Icon className="mr-3 h-4 w-4" />}
-      {!isCollapsed && <span>{item.title}</span>}
-      {item.badge && !isCollapsed && (
-        <span className="ml-auto rounded-full bg-primary px-2 py-1 text-xs text-primary-foreground">
-          {item.badge}
-        </span>
+      {isCollapsed ? (
+        // 收起状态：只显示居中的图标
+        <div className="flex w-full justify-center">
+          {Icon && <Icon className="h-4 w-4 flex-shrink-0" />}
+        </div>
+      ) : (
+        // 展开状态：显示完整布局
+        <>
+          {Icon && <Icon className="h-4 w-4 flex-shrink-0" />}
+          <span 
+            className={cn(
+              "transition-all duration-200 overflow-hidden whitespace-nowrap ml-3 opacity-100"
+            )}
+          >
+            {item.title}
+          </span>
+          {item.badge && (
+            <span 
+              className={cn(
+                "ml-auto rounded-full bg-primary px-2 py-1 text-xs text-primary-foreground transition-all duration-200 opacity-100 max-w-none"
+              )}
+            >
+              {item.badge}
+            </span>
+          )}
+        </>
       )}
     </Link>
   )
@@ -163,9 +214,14 @@ export function Sidebar() {
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <span className="text-sm font-bold">千</span>
           </div>
-          {isOpen && (
-            <span className="ml-3 text-lg font-semibold">千面中国游</span>
-          )}
+          <span 
+            className={cn(
+              "ml-3 text-lg font-semibold transition-all duration-300 overflow-hidden whitespace-nowrap",
+              isOpen ? "max-w-none opacity-100" : "max-w-0 opacity-0"
+            )}
+          >
+            千面中国游
+          </span>
         </Link>
       </div>
 
@@ -180,12 +236,15 @@ export function Sidebar() {
       <div className="border-t p-4">
         <div className="flex items-center">
           <div className="h-8 w-8 rounded-full bg-muted" />
-          {isOpen && (
-            <div className="ml-3">
-              <p className="text-sm font-medium">管理员</p>
-              <p className="text-xs text-muted-foreground">admin@example.com</p>
-            </div>
-          )}
+          <div 
+            className={cn(
+              "ml-3 transition-all duration-300 overflow-hidden",
+              isOpen ? "max-w-none opacity-100" : "max-w-0 opacity-0"
+            )}
+          >
+            <p className="text-sm font-medium whitespace-nowrap">管理员</p>
+            <p className="text-xs text-muted-foreground whitespace-nowrap">admin@example.com</p>
+          </div>
         </div>
       </div>
     </div>
