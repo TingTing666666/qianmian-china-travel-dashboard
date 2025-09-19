@@ -261,44 +261,45 @@ export function ChinaMap({ data = [] }: ChinaMapProps) {
   }, [data])
 
   return (
-    <Card className="relative overflow-hidden">
-      <CardHeader className="relative flex flex-row items-center justify-between space-y-0 pb-4">
-        <div className="space-y-1">
-          <CardTitle className="text-xl font-semibold tracking-tight flex items-center gap-3">
-            <MapPin className="h-5 w-5 text-blue-600" />
-            中国省份热力图
+    <Card className="shadow-sm border border-gray-200 overflow-hidden">
+      <CardHeader className="bg-white border-b border-gray-200">
+        <CardTitle className="flex items-center justify-between text-gray-900">
+          <div className="flex items-center">
+            <div className="p-2 bg-green-50 rounded-lg mr-3">
+              <MapPin className="w-5 h-5 text-green-600" />
+            </div>
+            <span className="text-xl font-semibold">中国省份热力图</span>
             {selectedProvince && (
-              <div className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">
+              <div className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 text-sm rounded-full ml-3">
                 已选中: {selectedProvince}
               </div>
             )}
-          </CardTitle>
-          <CardDescription className="text-sm text-muted-foreground">
-            基于YouTube视频内容的省份提及频次分析
-            {mapStats.provinces > 0 && (
-              <span className="ml-2 text-blue-600 font-medium">
-                • 共{mapStats.provinces}个省份 • 总计{mapStats.total.toLocaleString()}次提及
-              </span>
-            )}
-          </CardDescription>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRefresh}
-            disabled={refreshing}
-            className="h-9 px-3"
-            title="刷新数据"
-          >
-            <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
-          </Button>
-        </div>
+          </div>
+          <div className="flex items-center space-x-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="h-9 px-3"
+              title="刷新数据"
+            >
+              <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+            </Button>
+          </div>
+        </CardTitle>
+        <CardDescription className="text-sm text-muted-foreground">
+          基于YouTube视频内容的省份提及频次分析
+          {mapStats.provinces > 0 && (
+            <span className="ml-2 text-blue-600 font-medium">
+              • 共{mapStats.provinces}个省份 • 总计{mapStats.total.toLocaleString()}次提及
+            </span>
+          )}
+        </CardDescription>
       </CardHeader>
       
-      <CardContent className="relative p-0 pb-6">
-        <div className="px-6 pb-4">
+      <CardContent className="p-6">
+        <div className="mb-6">
           <div className="grid grid-cols-3 gap-4 text-center">
             <div className="bg-blue-50 rounded-lg p-3">
               <div className="text-2xl font-bold text-blue-600">{mapStats.provinces}</div>
@@ -315,10 +316,10 @@ export function ChinaMap({ data = [] }: ChinaMapProps) {
           </div>
         </div>
         
-        <div className="px-6">
+        <div className="flex items-center justify-center">
           <div 
             ref={chartRef} 
-            className="w-full h-[500px] rounded-lg"
+            className={`w-full h-[500px] rounded-lg transition-opacity duration-300 ${refreshing ? 'opacity-30' : 'opacity-100'}`}
             style={{ 
               minHeight: '500px'
             }}
