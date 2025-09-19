@@ -221,7 +221,7 @@ export function Sidebar() {
   const { isOpen, isMobile } = useSidebar()
   
   if (isMobile) {
-    return null // 移动端用抽屉组件
+    return null // 移动端在 MobileSidebar 组件中处理
   }
 
   return (

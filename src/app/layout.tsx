@@ -9,6 +9,7 @@ import { Inter } from "next/font/google"
 import { ThemeProvider } from "next-themes"
 import { SidebarProvider } from "@/components/layout/Sidebar/SidebarProvider"
 import { Sidebar } from "@/components/layout/Sidebar"
+import { MobileSidebar } from "@/components/layout/Sidebar/MobileSidebar"
 import { Header } from "@/components/layout/Header"
 import { PageTransition } from "@/components/layout/PageTransition"
 import { cn } from "@/lib/utils"
@@ -67,6 +68,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
           <SidebarProvider defaultOpen={true}>
             <div className="flex min-h-screen">
               <Sidebar />
+              <MobileSidebar />
               <div className="flex flex-1 flex-col">
                 <Header />
                 <main className="flex-1 overflow-hidden">

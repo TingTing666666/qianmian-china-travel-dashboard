@@ -32,7 +32,12 @@ export function SidebarProvider({ children, defaultOpen = true }: SidebarProvide
   // 检测移动端设备 - 只在客户端执行
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
+      const mobile = window.innerWidth < 768
+      setIsMobile(mobile)
+      // 在移动端默认关闭侧边栏，桌面端保持原状态
+      if (mobile && isOpen) {
+        setIsOpen(false)
+      }
     }
     
     // 初始检测
@@ -40,7 +45,7 @@ export function SidebarProvider({ children, defaultOpen = true }: SidebarProvide
     window.addEventListener("resize", checkMobile)
     
     return () => window.removeEventListener("resize", checkMobile)
-  }, [])
+  }, [isOpen])
 
   // 从 localStorage 恢复侧边栏状态（只在客户端初始化时执行一次）
   useEffect(() => {
