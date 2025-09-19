@@ -63,7 +63,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
           enableSystem
           disableTransitionOnChange
         >
-          <SidebarProvider>
+          <SidebarProvider defaultOpen={true}>
             <div className="flex min-h-screen">
               <Sidebar />
               <div className="flex flex-1 flex-col">

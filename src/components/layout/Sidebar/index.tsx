@@ -80,14 +80,10 @@ function SidebarItem({ item, isCollapsed }: SidebarItemProps) {
   // 处理收起状态下有子菜单项的点击
   const handleCollapsedClick = () => {
     if (isCollapsed && hasChildren) {
-      // 自动打开侧边栏
+      // 自动打开侧边栏，但不强制跳转页面
       setOpen(true)
-      // 根据不同的菜单项跳转到对应的默认页面
-      if (item.title === "视频看板") {
-        window.location.href = "/videos/analysis" // 跳转到时序分析
-      } else if (item.title === "评论看板") {
-        window.location.href = "/comments/analysis" // 跳转到评论分析
-      }
+      // 展开当前菜单项以显示子菜单
+      setIsExpanded(true)
     } else {
       setIsExpanded(!isExpanded)
     }
@@ -204,9 +200,10 @@ export function Sidebar() {
   return (
     <div
       className={cn(
-        "flex h-full flex-col border-r bg-background transition-all duration-300",
+        "flex h-full flex-col border-r bg-background transition-all duration-300 flex-shrink-0",
         isOpen ? "w-64" : "w-16"
       )}
+      style={{ minWidth: isOpen ? '256px' : '64px', maxWidth: isOpen ? '256px' : '64px' }}
     >
       {/* Logo 区域 */}
       <div className="flex h-16 items-center border-b px-4">

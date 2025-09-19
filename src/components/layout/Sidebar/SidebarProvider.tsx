@@ -27,6 +27,7 @@ interface SidebarProviderProps {
 export function SidebarProvider({ children, defaultOpen = true }: SidebarProviderProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen)
   const [isMobile, setIsMobile] = useState(false)
+  const [isInitialized, setIsInitialized] = useState(false)
 
   // 检测移动端设备
   useEffect(() => {
@@ -40,18 +41,21 @@ export function SidebarProvider({ children, defaultOpen = true }: SidebarProvide
     return () => window.removeEventListener("resize", checkMobile)
   }, [])
 
-  // 从 localStorage 恢复侧边栏状态
+  // 从 localStorage 恢复侧边栏状态（只在初始化时执行一次）
   useEffect(() => {
     const stored = localStorage.getItem("sidebar-open")
     if (stored !== null) {
       setIsOpen(JSON.parse(stored))
     }
+    setIsInitialized(true)
   }, [])
 
-  // 保存侧边栏状态到 localStorage
+  // 保存侧边栏状态到 localStorage（只在初始化完成后执行）
   useEffect(() => {
-    localStorage.setItem("sidebar-open", JSON.stringify(isOpen))
-  }, [isOpen])
+    if (isInitialized) {
+      localStorage.setItem("sidebar-open", JSON.stringify(isOpen))
+    }
+  }, [isOpen, isInitialized])
 
   const toggle = () => {
     setIsOpen(!isOpen)
