@@ -8,7 +8,8 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card"
 import { Button } from "@/components/ui/Button"
-import { BarChart, PieChart, TrendingUp } from "lucide-react"
+import { BarChart, PieChart, TrendingUp, Activity } from "lucide-react"
+import Link from "next/link"
 
 export default function VideosPage() {
   return (
@@ -21,35 +22,56 @@ export default function VideosPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <BarChart className="mr-2 h-4 w-4" />
-              时序分析
-            </CardTitle>
-            <CardDescription>深入分析视频发布的时间序列数据</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              查看视频发布趋势和时间分布热力图
-            </p>
-          </CardContent>
-        </Card>
+        <Link href="/videos/time-series">
+          <Card className="cursor-pointer hover:shadow-md transition-shadow">
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <BarChart className="mr-2 h-4 w-4" />
+                时序分析
+              </CardTitle>
+              <CardDescription>深入分析视频发布的时间序列数据</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                查看视频发布趋势和时间分布热力图
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <PieChart className="mr-2 h-4 w-4" />
-              视频数据
-            </CardTitle>
-            <CardDescription>原始视频数据和统计信息</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              浏览和管理视频数据库
-            </p>
-          </CardContent>
-        </Card>
+        <Link href="/videos/popularity">
+          <Card className="cursor-pointer hover:shadow-md transition-shadow">
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Activity className="mr-2 h-4 w-4" />
+                热度分析
+              </CardTitle>
+              <CardDescription>基于点赞数、评论数和观看次数的热度因素分析</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                分析视频热度因素的关联性和分布情况
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Link href="/videos/data">
+          <Card className="cursor-pointer hover:shadow-md transition-shadow">
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <PieChart className="mr-2 h-4 w-4" />
+                视频数据
+              </CardTitle>
+              <CardDescription>原始视频数据和统计信息</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                浏览和管理视频数据库
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
 
         <Card>
           <CardHeader>

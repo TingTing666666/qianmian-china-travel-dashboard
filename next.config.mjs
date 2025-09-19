@@ -53,12 +53,6 @@ const nextConfig = {
         destination: '/dashboard',
         permanent: false,
       },
-      // 添加一个兜底重定向，防止任何 quotes 路由
-      {
-        source: '/quotes/:path*',
-        destination: '/dashboard',
-        permanent: false,
-      },
     ]
   },
   
