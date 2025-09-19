@@ -172,22 +172,27 @@ function MobileSidebarItem({ item, onItemClick }: MobileSidebarItemProps) {
 export function MobileSidebar() {
   const { isOpen, setOpen, isMobile } = useSidebar()
 
+  console.log('MobileSidebar 渲染:', { isOpen, isMobile })
+
   const handleClose = () => {
     setOpen(false)
   }
 
   // 只在移动端显示
   if (!isMobile) {
+    console.log('非移动端，不渲染 MobileSidebar')
     return null
   }
 
+  console.log('移动端，准备渲染抽屉:', { isOpen })
+
   return (
-    <AnimatePresence>
+    <AnimatePresence mode="wait">
       {isOpen && (
-        <>
+        <div className="fixed inset-0 z-[100]">
           {/* 背景遮罩 */}
           <motion.div
-            className="fixed inset-0 z-50 bg-black/50"
+            className="absolute inset-0 bg-black/50"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -196,7 +201,7 @@ export function MobileSidebar() {
           
           {/* 侧边栏抽屉 */}
           <motion.div
-            className="fixed left-0 top-0 z-50 h-full w-80 max-w-[85vw] bg-background border-r shadow-lg overflow-y-auto relative"
+            className="absolute left-0 top-0 h-full w-80 max-w-[85vw] bg-background border-r shadow-lg overflow-y-auto"
             initial={{ x: "-100%" }}
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
@@ -242,7 +247,7 @@ export function MobileSidebar() {
               </div>
             </div>
           </motion.div>
-        </>
+        </div>
       )}
     </AnimatePresence>
   )

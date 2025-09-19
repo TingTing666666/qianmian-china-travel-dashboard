@@ -11,13 +11,20 @@ import { Button } from "@/components/ui/Button"
 import { useSidebar } from "./SidebarProvider"
 
 export function SidebarTrigger() {
-  const { toggle } = useSidebar()
+  const { toggle, isOpen, isMobile } = useSidebar()
+
+  console.log('SidebarTrigger 渲染:', { isOpen, isMobile })
+
+  const handleClick = () => {
+    console.log('SidebarTrigger 点击:', { 当前状态: isOpen, 移动端: isMobile })
+    toggle()
+  }
 
   return (
     <Button
       variant="ghost"
       size="icon"
-      onClick={toggle}
+      onClick={handleClick}
       aria-label="切换侧边栏"
     >
       <Menu className="h-4 w-4" />
