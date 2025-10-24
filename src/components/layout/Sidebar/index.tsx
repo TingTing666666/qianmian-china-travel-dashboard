@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { useSidebar } from "./SidebarProvider"
-import { Home, Info, Video, MessageCircle, ChevronDown, ChevronRight, MapPin } from "lucide-react"
+import { Home, Info, Video, MessageCircle, ChevronDown, ChevronRight, MapPin, Sparkles } from "lucide-react"
 import { NavItem } from "@/types/global"
 
 // 导航配置
@@ -56,6 +56,21 @@ const navigationItems: NavItem[] = [
       {
         title: "评论数据",
         href: "/comments/data",
+      },
+    ],
+  },
+  {
+    title: "大模型分析",
+    href: "/ai",
+    icon: Sparkles,
+    children: [
+      {
+        title: "千面大模型助手",
+        href: "/ai/assistant",
+      },
+      {
+        title: "AI分析报告",
+        href: "/ai/reports",
       },
     ],
   },
