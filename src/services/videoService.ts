@@ -93,7 +93,7 @@ export class VideoService {
       }
     } catch (error) {
       console.error('获取视频数据失败:', error)
-      throw new Error('获取视频数据失败')
+      throw new Error(`获取视频数据失败: ${error instanceof Error ? error.message : String(error)}`)
     }
   }
 
@@ -123,7 +123,7 @@ export class VideoService {
       }
     } catch (error) {
       console.error('获取视频统计失败:', error)
-      throw new Error('获取视频统计失败')
+      throw new Error(`获取视频统计失败: ${error instanceof Error ? error.message : String(error)}`)
     }
   }
 
@@ -144,7 +144,140 @@ export class VideoService {
       return result.rows
     } catch (error) {
       console.error('获取频道列表失败:', error)
-      throw new Error('获取频道列表失败')
+      throw new Error(`获取频道列表失败: ${error instanceof Error ? error.message : String(error)}`)
+    }
+  }
+
+  // 根据ID获取视频
+  async getVideoById(id: string): Promise<VideoData | null> {
+    try {
+      const result = await query(`
+        SELECT 
+          id,
+          title,
+          description,
+          published_at,
+          channel_title,
+          channel_id,
+          tags,
+          category_id,
+          view_count,
+          like_count,
+          favorite_count,
+          comment_count,
+          duration,
+          created_at,
+          updated_at
+        FROM video_fdata
+        WHERE id = $1
+      `, [id])
+      
+      return result.rows.length > 0 ? result.rows[0] : null
+    } catch (error) {
+      console.error('获取视频失败:', error)
+      throw new Error(`获取视频失败: ${error instanceof Error ? error.message : String(error)}`)
+    }
+  }
+
+  // 创建新视频
+  async createVideo(videoData: Omit<VideoData, 'created_at' | 'updated_at'>): Promise<VideoData> {
+    try {
+      const result = await query(`
+        INSERT INTO video_fdata (
+          id,
+          title,
+          description,
+          published_at,
+          channel_title,
+          channel_id,
+          tags,
+          category_id,
+          view_count,
+          like_count,
+          favorite_count,
+          comment_count,
+          duration,
+          created_at,
+          updated_at
+        ) VALUES (
+          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW(), NOW()
+        )
+        RETURNING 
+          id,
+          title,
+          description,
+          published_at,
+          channel_title,
+          channel_id,
+          tags,
+          category_id,
+          view_count,
+          like_count,
+          favorite_count,
+          comment_count,
+          duration,
+          created_at,
+          updated_at
+      `, [
+        videoData.id,
+        videoData.title,
+        videoData.description,
+        videoData.published_at,
+        videoData.channel_title,
+        videoData.channel_id,
+        videoData.tags,
+        videoData.category_id,
+        videoData.view_count,
+        videoData.like_count,
+        videoData.favorite_count,
+        videoData.comment_count,
+        videoData.duration
+      ])
+      
+      return result.rows[0]
+    } catch (error) {
+      console.error('创建视频失败:', error)
+      throw new Error(`创建视频失败: ${error instanceof Error ? error.message : String(error)}`)
+    }
+  }
+
+  // 更新视频数据
+  async updateVideo(id: string, videoData: Partial<Omit<VideoData, 'id' | 'created_at' | 'updated_at'>>): Promise<VideoData> {
+    try {
+      const fields = Object.keys(videoData).filter(key => videoData[key as keyof typeof videoData] !== undefined)
+      const values = fields.map(key => videoData[key as keyof typeof videoData])
+      const setClause = fields.map((field, index) => `${field} = $${index + 2}`).join(', ')
+      
+      const result = await query(`
+        UPDATE video_fdata 
+        SET ${setClause}, updated_at = NOW()
+        WHERE id = $1
+        RETURNING 
+          id,
+          title,
+          description,
+          published_at,
+          channel_title,
+          channel_id,
+          tags,
+          category_id,
+          view_count,
+          like_count,
+          favorite_count,
+          comment_count,
+          duration,
+          created_at,
+          updated_at
+      `, [id, ...values])
+      
+      if (result.rows.length === 0) {
+        throw new Error('视频不存在')
+      }
+      
+      return result.rows[0]
+    } catch (error) {
+      console.error('更新视频失败:', error)
+      throw new Error(`更新视频失败: ${error instanceof Error ? error.message : String(error)}`)
     }
   }
 }
