@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card"
 import { Badge } from "@/components/ui/Badge"
 import { Button } from "@/components/ui/Button"
 import { FileText, Download, Calendar, TrendingUp, BarChart3, PieChart } from "lucide-react"
+import Link from "next/link"
 
 export default function AIReportsPage() {
   return (
@@ -36,21 +37,24 @@ export default function AIReportsPage() {
                   description: "包含视频播放量、用户评论情感分析、地域分布等多维度数据分析",
                   date: "2024-01-15",
                   status: "已完成",
-                  type: "综合分析"
+                  type: "综合分析",
+                  link: "/ai/reports/comprehensive-analysis"
                 },
                 {
                   title: "热门旅游目的地趋势报告",
                   description: "基于用户行为和内容偏好分析的旅游热点预测",
                   date: "2024-01-10", 
                   status: "已完成",
-                  type: "趋势预测"
+                  type: "趋势预测",
+                  link: "/ai/reports/trend-analysis"
                 },
                 {
                   title: "用户画像与偏好分析",
                   description: "深度分析用户群体特征和内容偏好模式",
                   date: "2024-01-05",
                   status: "生成中",
-                  type: "用户分析"
+                  type: "用户分析",
+                  link: null
                 }
               ].map((report, index) => (
                 <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
@@ -71,9 +75,17 @@ export default function AIReportsPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm">
-                      查看
-                    </Button>
+                    {report.status === "已完成" && report.link ? (
+                      <Link href={report.link}>
+                        <Button variant="outline" size="sm">
+                          查看
+                        </Button>
+                      </Link>
+                    ) : (
+                      <Button variant="outline" size="sm" disabled={report.status !== "已完成"}>
+                        查看
+                      </Button>
+                    )}
                     {report.status === "已完成" && (
                       <Button variant="outline" size="sm">
                         <Download className="h-4 w-4" />
