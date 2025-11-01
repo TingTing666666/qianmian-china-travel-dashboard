@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { useSidebar } from "./SidebarProvider"
-import { Home, Info, Video, MessageCircle, ChevronDown, ChevronRight, MapPin, Sparkles } from "lucide-react"
+import { Home, Info, Video, MessageCircle, ChevronDown, ChevronRight, MapPin, Sparkles, FolderOpen, Users, Settings } from "lucide-react"
 import { NavItem } from "@/types/global"
 
 // 导航配置
@@ -17,7 +17,7 @@ const navigationItems: NavItem[] = [
     icon: Home,
   },
   {
-    title: "简介",
+    title: "系统信息",
     href: "/about",
     icon: Info,
   },
@@ -71,6 +71,30 @@ const navigationItems: NavItem[] = [
       {
         title: "AI分析报告",
         href: "/ai/reports",
+      },
+    ],
+  },
+  {
+    title: "项目介绍",
+    href: "/project",
+    icon: FolderOpen,
+  },
+  {
+    title: "团队介绍",
+    href: "/team",
+    icon: Users,
+  },
+  {
+    title: "后台管理",
+    icon: Settings,
+    children: [
+      {
+        title: "API监控",
+        href: "/getvideodata",
+      },
+      {
+        title: "模型工作流",
+        href: "/workflow",
       },
     ],
   },
